@@ -221,11 +221,11 @@ function line0( x0, y0, x1, y1 )
 {
     context.beginPath();
     context.strokeStyle="#FF0000"; // red
-    context.lineWidth = 1;
+    context.lineWidth = sx;
     context.imageSmoothingEnabled = false;
 
-    context.moveTo( x0, y0 );
-    context.lineTo( x1, y1 );
+    context.moveTo( x0*sx+sx/2, y0*sy+sy/2 );
+    context.lineTo( x1*sx+sx/2, y1*sy+sy/2 );
     context.stroke();
 }
 
@@ -415,13 +415,13 @@ function onLoad()
     init();
     clear();
 
-    grid( [128,128,128,255] );
+    grid( [128,128,128,255] ); draw();
 
     var x0 = 10, y0 = 20;
     var x1 = 40, y1 = 30;
 
 // Uncomment 1, 2, or all 3
-//    line0( x0, y0, x1, y1 ); get();
+      line0( x0, y0, x1, y1 ); get();
 //    line1( x0, y0, x1, y1 ); draw(); // float
 //    line2( x0, y0, x1, y1 ); draw(); // float
 //    line3( x0, y0, x1, y1 ); draw(); // float
