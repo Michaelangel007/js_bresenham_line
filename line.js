@@ -199,9 +199,82 @@ function line2( x0, y0, x1, y1 )
     }
 }
 
-// integer
+// floating-point
 // ========================================================================
 function line3( x0, y0, x1, y1 )
+{
+    var x, y = y0;
+    var color = [0,0,255,128]; // blue
+
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var m  = 2 * dy / dx;
+    var e  = 0;
+
+    for( x = x0; x <= x1; ++x )
+    {
+        // truncate to integer: y|0
+        addpixel( x, y|0, color ); // normally, putpixel()
+        e += m;
+        if (e > 1)
+        {
+            y++;
+            e -= 2;
+        }
+    }
+}
+
+// floating-point
+// ========================================================================
+function line4( x0, y0, x1, y1 )
+{
+    var x, y = y0;
+    var color = [0,0,255,128]; // blue
+
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var m  = 2*dy;
+    var e  = 0;
+
+    for( x = x0; x <= x1; ++x )
+    {
+        addpixel( x, y, color ); // normally, putpixel()
+        e += m;
+        if (e > dx)
+        {
+            y++;
+            e -= 2*dx;
+        }
+    }
+}
+
+// floating-point
+// ========================================================================
+function line5( x0, y0, x1, y1 )
+{
+    var x, y = y0;
+    var color = [0,255,0,128]; // green
+
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var m  = 2*dy;
+    var e  = -dx;
+
+    for( x = x0; x <= x1; ++x )
+    {
+        addpixel( x, y, color ); // normally, putpixel()
+        e += m;
+        if (e > 0)
+        {
+            y++;
+            e -= 2*dx;
+        }
+    }
+}
+
+// integer
+// ========================================================================
+function linei( x0, y0, x1, y1 )
 {
     var x, y = y0;
     var color = [0,0,255,128]; // blue
@@ -233,5 +306,8 @@ function onLoad()
 //    line0( 10, 20, 40, 30 ); get();
 //    line1( 10, 20, 40, 30 ); draw(); // float
 //    line2( 10, 20, 40, 30 ); draw(); // float
-     line3( 10, 20, 40, 30 ); draw(); // int
+//    line3( 10, 20, 40, 30 ); draw(); // float
+//    line4( 10, 20, 40, 30 ); draw(); // float
+//    line5( 10, 20, 40, 30 ); draw(); // float
+    linei( 10, 20, 40, 30 ); draw(); // int
 }
