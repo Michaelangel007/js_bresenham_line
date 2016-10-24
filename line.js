@@ -17,8 +17,11 @@ References:
 */
 
 var canvas, context, image, data;
-var w = 280;
-var h = 192;
+var w;
+var h;
+
+var sx = 10;
+var sy = 10;
 
 // Debug
 
@@ -111,8 +114,31 @@ var h = 192;
     }
 
     // ========================================================================
+    function subpixel( x, y, r,g,b,a)
+    {
+        var i = ((y * image.width) + x) * 4;
+
+        // r is array [r,g,b,a]
+        if ((typeof r === 'object') && Array.isArray( r ))
+        {
+            var t = r;
+            r = t[0];
+            g = t[1];
+            b = t[2];
+            a = t[3];
+        }
+        // else: 'number'
+
+        data[i+0] -= r;
+        data[i+1] -= g;
+        data[i+2] -= b;
+        data[i+3] -= a;
+    }
+
+    // ========================================================================
     function mulpixel( x, y, r,g,b,a)
     {
+        // var v = h - y; // put origin at bottom-left instead of top-left
         var i = ((y * image.width) + x) * 4;
 
         // r is array [r,g,b,a]
@@ -132,10 +158,48 @@ var h = 192;
         data[i+3] *= a / 255;
     }
 
+    // ========================================================================
+    function zoompixel( x, y, op, color )
+    {
+        var i, j;
+        var u = sx-1;
+        var v = sy-1;
+
+        for( j = 0; j < v; j++ )
+        {
+            for( i = 0 ; i < u; i++ )
+            {
+                op( x*sx + i, y*sy + j, color );
+            }
+        }
+    }
+
+// ========================================================================
+function grid( color )
+{
+    var u = sx-1;
+    var v = sy-1;
+    var x,y;
+
+    for( y = 0; y < h; y++ )
+    {
+        for( x = 0 ; x < w; x++ )
+        {
+            if (0
+            ||  (x % sx) == u
+            ||  (y % sy) == v
+            )
+                putpixel( x, y, color );
+        }
+    }
+}
+
 // ========================================================================
 function init()
 {
     canvas  = document.getElementById( 'canvas' );
+    w = canvas.width;
+    h = canvas.height;
     context = canvas.getContext( '2d' );
 
     image   = context.createImageData( w, h );
@@ -164,13 +228,15 @@ function line1( x0, y0, x1, y1 )
 
     var dx = x1 - x0;
     var dy = y1 - y0;
-    var ds = dy / dx;
+    var m  = dy / dx;
 
     for( x = x0; x <= x1; ++x )
     {
-        // truncate to integer: y|0
-        addpixel( x, y|0, color ); // normally, putpixel()
-        y += ds;
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y|0, addpixel, color ); // truncate to integer: y|0
+
+        y += m;
     }
 }
 
@@ -188,8 +254,10 @@ function line2( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        // truncate to integer: y|0
-        addpixel( x, y|0, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y|0, addpixel, color ); // truncate to integer: y|0
+
         e += m;
         if (e > 0.5)
         {
@@ -213,8 +281,10 @@ function line3( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        // truncate to integer: y|0
-        addpixel( x, y|0, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y|0, addpixel, color ); // truncate to integer: y|0
+
         e += m;
         if (e > 1)
         {
@@ -238,7 +308,10 @@ function line4( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        addpixel( x, y, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y, addpixel, color );
+
         e += m;
         if (e > dx)
         {
@@ -262,7 +335,10 @@ function line5( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        addpixel( x, y, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y, addpixel, color );
+
         e += m;
         if (e > 0)
         {
@@ -285,7 +361,9 @@ function linei( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        addpixel( x, y, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y, addpixel, color );
 
         if (s > 0)
         {
@@ -309,7 +387,9 @@ function linej( x0, y0, x1, y1 )
 
     for( x = x0; x <= x1; ++x )
     {
-        addpixel( x, y, color ); // normally, putpixel()
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, y, addpixel, color );
 
         if (s >= 0)
         {
@@ -325,13 +405,18 @@ function onLoad()
     init();
     clear();
 
+    grid( [128,128,128,255] );
+
+    var x0 = 10, y0 = 20;
+    var x1 = 40, y1 = 30;
+
 // Uncomment 1, 2, or all 3
-//    line0( 10, 20, 40, 30 ); get();
-//    line1( 10, 20, 40, 30 ); draw(); // float
-//    line2( 10, 20, 40, 30 ); draw(); // float
-//    line3( 10, 20, 40, 30 ); draw(); // float
-//    line4( 10, 20, 40, 30 ); draw(); // float
-//    line5( 10, 20, 40, 30 ); draw(); // float
-//      linei( 10, 20, 40, 30 ); draw(); // int
-      linej( 10, 20, 40, 30 ); draw(); // int
+//    line0( x0, y0, x1, y1 ); get();
+//    line1( x0, y0, x1, y1 ); draw(); // float
+//    line2( x0, y0, x1, y1 ); draw(); // float
+//    line3( x0, y0, x1, y1 ); draw(); // float
+//    line4( x0, y0, x1, y1 ); draw(); // float
+//    line5( x0, y0, x1, y1 ); draw(); // float
+//    linei( x0, y0, x1, y1 ); draw(); // int
+      linej( x0, y0, x1, y1 ); draw(); // int
 }
