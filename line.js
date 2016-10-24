@@ -174,6 +174,22 @@ var sy = 10;
         }
     }
 
+function vline( x, color )
+{
+    var y;
+
+    for( y = 0; y < h; y++ )
+        putpixel( x, y, color );
+}
+
+function hline( y, color )
+{
+    var x;
+
+    for( x = 0 ; x < w; x++ )
+        putpixel( x, y, color );
+}
+
 // ========================================================================
 function grid( color )
 {
@@ -181,17 +197,11 @@ function grid( color )
     var v = sy-1;
     var x,y;
 
-    for( y = 0; y < h; y++ )
-    {
-        for( x = 0 ; x < w; x++ )
-        {
-            if (0
-            ||  (x % sx) == u
-            ||  (y % sy) == v
-            )
-                putpixel( x, y, color );
-        }
-    }
+    for( y = 0; y < h; y += sy )
+        hline( y, color );
+
+    for( x = 0 ; x < w; x += sx )
+        vline( x, color );
 }
 
 // ========================================================================
