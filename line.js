@@ -419,4 +419,8 @@ function onLoad()
 //    line5( x0, y0, x1, y1 ); draw(); // float
 //    linei( x0, y0, x1, y1 ); draw(); // int
       linej( x0, y0, x1, y1 ); draw(); // int
+
+    var black = [ 128, 128, 128, -64 ];
+    zoompixel( x0, y0, subpixel, black ); draw();
+    zoompixel( x1, y1, subpixel, black ); draw();
 }
