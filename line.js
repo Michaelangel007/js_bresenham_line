@@ -3,12 +3,14 @@
 /*
 References:
 * https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+* https://csustan.csustan.edu/~tom/Lecture-Notes/Graphics/Bresenham-Line/Bresenham-Line.pdf
 * https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
 * https://www.cs.helsinki.fi/group/goa/mallinnus/lines/bresenh.html
 
 * Mid-Point
 * https://www.tutorialspoint.com/computer_graphics/line_generation_algorithm.htm
-
+* https://upload.wikimedia.org/wikipedia/commons/5/5a/Line_1.5x%2B1_--_planes.svg
+* https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#/media/File:Line_1.5x%2B1_--_planes.svg
 
 * https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
 * http://tutorials.jenkov.com/html5-canvas/pixels.html
