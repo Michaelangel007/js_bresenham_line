@@ -272,7 +272,7 @@ function line5( x0, y0, x1, y1 )
     }
 }
 
-// integer
+// integer: > 0
 // ========================================================================
 function linei( x0, y0, x1, y1 )
 {
@@ -288,7 +288,7 @@ function linei( x0, y0, x1, y1 )
         addpixel( x, y, color ); // normally, putpixel()
 
         if (s > 0)
-        { 
+        {
             s -= dx;
             y++;
         }
@@ -296,6 +296,29 @@ function linei( x0, y0, x1, y1 )
     }
 }
 
+// integer: >= 0
+// ========================================================================
+function linej( x0, y0, x1, y1 )
+{
+    var x, y = y0;
+    var color = [0,0,255,128]; // blue
+
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var s  = 2*dy - dx;
+
+    for( x = x0; x <= x1; ++x )
+    {
+        addpixel( x, y, color ); // normally, putpixel()
+
+        if (s >= 0)
+        {
+            s -= dx;
+            y++;
+        }
+        s += dy;
+    }
+}
 
 function onLoad()
 {
@@ -309,5 +332,6 @@ function onLoad()
 //    line3( 10, 20, 40, 30 ); draw(); // float
 //    line4( 10, 20, 40, 30 ); draw(); // float
 //    line5( 10, 20, 40, 30 ); draw(); // float
-    linei( 10, 20, 40, 30 ); draw(); // int
+//      linei( 10, 20, 40, 30 ); draw(); // int
+      linej( 10, 20, 40, 30 ); draw(); // int
 }
