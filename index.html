@@ -238,7 +238,7 @@ function init()
 function line0( x0, y0, x1, y1 )
 {
     context.beginPath();
-    context.strokeStyle="#FF0000"; // red
+    context.strokeStyle="#444444";
     context.lineWidth = sx;
     context.imageSmoothingEnabled = false;
 
@@ -249,10 +249,9 @@ function line0( x0, y0, x1, y1 )
 
 // floating-point: truncate
 // ========================================================================
-function line1( x0, y0, x1, y1 )
+function line1( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,255,0,128]; // green
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -270,10 +269,9 @@ function line1( x0, y0, x1, y1 )
 
 // floating-point: round
 // ========================================================================
-function line2( x0, y0, x1, y1 )
+function line2( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,255,0,128]; // green
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -291,10 +289,9 @@ function line2( x0, y0, x1, y1 )
 
 // floating-point: half e
 // ========================================================================
-function line3( x0, y0, x1, y1 )
+function line3( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,255,0,128]; // green
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -305,7 +302,7 @@ function line3( x0, y0, x1, y1 )
     {
         //setpixel( x, y, color );
         //addpixel( x, y, color );
-        zoompixel( x, y|0, addpixel, color ); // truncate to integer: y|0
+        zoompixel( x, y, addpixel, color ); // truncate to integer: y|0
 
         e += m;
         if (e > 0.5)
@@ -318,10 +315,9 @@ function line3( x0, y0, x1, y1 )
 
 // floating-point: full e
 // ========================================================================
-function line4( x0, y0, x1, y1 )
+function line4( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,0,255,128]; // blue
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -332,7 +328,7 @@ function line4( x0, y0, x1, y1 )
     {
         //setpixel( x, y, color );
         //addpixel( x, y, color );
-        zoompixel( x, y|0, addpixel, color ); // truncate to integer: y|0
+        zoompixel( x, y, addpixel, color ); // truncate to integer: y|0
 
         e += m;
         if (e > 1)
@@ -345,10 +341,9 @@ function line4( x0, y0, x1, y1 )
 
 // floating-point: m=2dy, e > dx
 // ========================================================================
-function line5( x0, y0, x1, y1 )
+function line5( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,0,255,128]; // blue
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -372,10 +367,9 @@ function line5( x0, y0, x1, y1 )
 
 // floating-point: negdx
 // ========================================================================
-function line6( x0, y0, x1, y1 )
+function line6( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,255,0,128]; // green
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -398,11 +392,11 @@ function line6( x0, y0, x1, y1 )
 }
 
 // integer: > 0
+    var color = [0,255,0,128]; // green
 // ========================================================================
-function linei( x0, y0, x1, y1 )
+function linei( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,0,255,128]; // blue
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -425,10 +419,9 @@ function linei( x0, y0, x1, y1 )
 
 // integer: >= 0
 // ========================================================================
-function linej( x0, y0, x1, y1 )
+function linej( x0, y0, x1, y1, color )
 {
     var x, y = y0;
-    var color = [0,0,255,128]; // blue
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -449,39 +442,188 @@ function linej( x0, y0, x1, y1 )
     }
 }
 
+// UI ___________________________________________________________________
+
 function onLine1()
 {
     update( LINE_FLOAT_TRUNC );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = dy / dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y|0 );\n"+
+"\n"+
+"        y += m;\n"+
+"    }\n";
+    output( text );
 }
 
 function onLine2()
 {
     update( LINE_FLOAT_ROUND );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = dy / dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, Math.round(y) );\n"+
+"\n"+
+"        y += m;\n"+
+"    }\n"
+    ;
+    output( text );
 }
 
 function onLine3()
 {
     update( LINE_FLOAT_HALFE );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = dy / dx;\n"+
+"    var e  = 0;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        e += m;\n"+
+"        if (e > 0.5)\n"+
+"        {\n"+
+"            y++;\n"+
+"            e -= 1;\n"+
+"        }\n"+
+"    }\n";
+    output( text );
 }
 
 function onLine4()
 {
     update( LINE_FLOAT_ONE_E );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = 2 * dy / dx;\n"+
+"    var e  = 0;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        e += m;\n"+
+"        if (e > 1)\n"+
+"        {\n"+
+"            y++;\n"+
+"            e -= 2;\n"+
+"        }\n"+
+"    }\n";
+    output( text );
 }
 
 function onLine5()
 {
-    update( LINE_FLOAT_ONE_E );
+    update( LINE_FLOAT_M_2DY );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = 2*dy;\n"+
+"    var e  = 0;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        e += m;\n"+
+"        if (e > dx)\n"+
+"        {\n"+
+"            y++;\n"+
+"            e -= 2*dx;\n"+
+"        }\n"+
+"    }\n";
+    output( text );
+}
+
+function onLine6()
+{
+    update( LINE_FLOAT_E_G_0 );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = 2*dy;\n"+
+"    var e  = -dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        e += m;\n"+
+"        if (e > 0)\n"+
+"        {\n"+
+"            y++;\n"+
+"            e -= 2*dx;\n"+
+"        }\n"+
+"    }\n";
+
+    output( text );
 }
 
 function onLineI()
 {
     update( LINE_INT_G0 );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var s  = 2*dy - dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        if (s > 0)\n"+
+"        {\n"+
+"            s -= dx;\n"+
+"            y++;\n"+
+"        }\n"+
+"        s += dy;\n"+
+"    }\n"+
+"";
+    output( text );
 }
 
 function onLineJ()
 {
     update( LINE_INT_GE );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var s  = 2*dy - dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, y );\n"+
+"\n"+
+"        if (s >= 0)\n"+
+"        {\n"+
+"            s -= dx;\n"+
+"            y++;\n"+
+"        }\n"+
+"        s += dy;\n"+
+"    }\n"+
+"";
+    output( text );
 }
 
 function onLoad()
@@ -495,6 +637,17 @@ function update( type )
 {
     line = type;
 
+    var black = [ 128, 128, 128, -64 ];
+    var colors = 
+    [
+        [ 255,   0,   0, 128 ],
+        [ 255, 255,   0, 128 ],
+        [   0, 255,   0, 128 ],
+        [   0, 255, 255, 128 ],
+        [   0,   0, 255, 128 ],
+        [ 128,   0, 255, 128 ]
+    ];
+
     clear();
     get();
     grid( [128,128,128,255] ); draw();
@@ -504,17 +657,15 @@ function update( type )
 
     line0( x0, y0, x1, y1 ); get();
 
-    if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1 ); draw(); // float: truncate
-    if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1 ); draw(); // float: round
-    if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1 ); draw(); // float: e > 0.5
-    if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1 ); draw(); // float: e > 1
-    if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1 ); draw(); // float: m = 2*dy
-    if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1 ); draw(); // float
+    if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1, colors[0] ); draw(); // float: truncate
+    if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1, colors[1] ); draw(); // float: round
+    if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1, colors[2] ); draw(); // float: e > 0.5
+    if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1, colors[3] ); draw(); // float: e > 1
+    if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1, colors[4] ); draw(); // float: e > dx
+    if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1, colors[5] ); draw(); // float: e > 0
+    if (type == LINE_INT_G0     ) linei( x0, y0, x1, y1, colors[4] ); draw(); // int: >  0
+    if (type == LINE_INT_GE     ) linej( x0, y0, x1, y1, colors[5] ); draw(); // int: >= 0
 
-    if (type == LINE_INT_G0) linei( x0, y0, x1, y1 ); draw(); // int: >  0
-    if (type == LINE_INT_GE) linej( x0, y0, x1, y1 ); draw(); // int: >= 0
-
-    var black = [ 128, 128, 128, -64 ];
     zoompixel( x0, y0, subpixel, black ); draw();
     zoompixel( x1, y1, subpixel, black ); draw();
 }
@@ -534,13 +685,13 @@ function update( type )
         </tr>
     </table>
 <button id="buttonLine1" onclick="onLine1()">Float Round        </button>
-<button id="buttonLine1" onclick="onLine2()">Float Trunc        </button>
-<button id="buttonLine1" onclick="onLine3()">Float e &gt; &half;</button>
-<button id="buttonLine1" onclick="onLine4()">Float e &gt; 1     </button>
-<button id="buttonLine1" onclick="onLine5()">Float e &gt; dx    </button>
-<button id="buttonLine1" onclick="onLine6()">Float e &gt; 0     </button>
-<button id="buttonLine1" onclick="onLineI()">Int &gt; 0         </button>
-<button id="buttonLine1" onclick="onLineJ()">Int &gt;= 0        </button>
+<button id="buttonLine2" onclick="onLine2()">Float Trunc        </button>
+<button id="buttonLine3" onclick="onLine3()">Float e &gt; &half;</button>
+<button id="buttonLine4" onclick="onLine4()">Float e &gt; 1     </button>
+<button id="buttonLine5" onclick="onLine5()">Float e &gt; dx    </button>
+<button id="buttonLine6" onclick="onLine6()">Float e &gt; 0     </button>
+<button id="buttonLineI" onclick="onLineI()">Int &gt; 0         </button>
+<button id="buttonLineJ" onclick="onLineJ()">Int &gt;= 0        </button>
 <h2>Verification of Bresenham / Mid-Point formula</h1>
 </body>
 </html>
