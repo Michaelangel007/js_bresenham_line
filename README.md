@@ -1,5 +1,8 @@
 # Bresenham's Line Derivation
 
+[Live Demo (HTML Preview)](http://htmlpreview.github.io/?https://raw.githubusercontent.com/Michaelangel007/js_bresenham_line/master/index.html)
+[Live Demo (Raw Git View)](https://cdn.rawgit.com/Michaelangel007/js_bresenham_line/master/index.html)
+
 Another way to derive the line drawing algorithm is incrementally.
 
 Assumptions:
@@ -75,7 +78,7 @@ We also want to get rid of that division -- we need to multiply all the terms by
       y = y + 1
 ```
 
-We also want to compare the sign instead of 'e > dx' -- we can change that by offsetting the initial term.
+We also want to compare the sign instead of `e > dx` -- we can change that by offsetting the initial term.
 
 ```
  e = -dx;
@@ -87,7 +90,4 @@ We also want to compare the sign instead of 'e > dx' -- we can change that by of
       e = e - 2*dx
       y = y + 1
 ```
-
-
-
 
