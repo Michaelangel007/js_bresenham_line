@@ -16,12 +16,26 @@ References:
 * http://tutorials.jenkov.com/html5-canvas/pixels.html
 */
 
-var canvas, context, image, data;
-var w;
-var h;
+// Tpes
+    var LINE_FLOAT_ROUND = 1;
+    var LINE_FLOAT_TRUNC = 2;
+    var LINE_FLOAT_HALFE = 3;
+    var LINE_FLOAT_ONE_E = 4;
+    var LINE_FLOAT_M_2DY = 5;
+    var LINE_FLOAT_E_G_0 = 6;
+    var LINE_INT_G0      = 7;
+    var LINE_INT_GE      = 8;
 
-var sx = 10;
-var sy = 10;
+    var line = LINE_FLOAT_TRUNC;
+
+// Globals
+    var canvas, context, image, data;
+    var w;
+    var h;
+
+    var sx = 10;
+    var sy = 10;
+
 
 // Debug
 
@@ -32,7 +46,7 @@ var sy = 10;
         pre.innerHTML = text;
     }
 
-// Framebuffer
+// FramebufferLINE_INT_G0
 
     // ========================================================================
     function draw()
@@ -229,7 +243,7 @@ function line0( x0, y0, x1, y1 )
     context.stroke();
 }
 
-// floating-point
+// floating-point: truncate
 // ========================================================================
 function line1( x0, y0, x1, y1 )
 {
@@ -250,9 +264,30 @@ function line1( x0, y0, x1, y1 )
     }
 }
 
-// floating-point
+// floating-point: round
 // ========================================================================
 function line2( x0, y0, x1, y1 )
+{
+    var x, y = y0;
+    var color = [0,255,0,128]; // green
+
+    var dx = x1 - x0;
+    var dy = y1 - y0;
+    var m  = dy / dx;
+
+    for( x = x0; x <= x1; ++x )
+    {
+        //setpixel( x, y, color );
+        //addpixel( x, y, color );
+        zoompixel( x, Math.round(y), addpixel, color ); // truncate to integer: y|0
+
+        y += m;
+    }
+}
+
+// floating-point: half e
+// ========================================================================
+function line3( x0, y0, x1, y1 )
 {
     var x, y = y0;
     var color = [0,255,0,128]; // green
@@ -277,9 +312,9 @@ function line2( x0, y0, x1, y1 )
     }
 }
 
-// floating-point
+// floating-point: full e
 // ========================================================================
-function line3( x0, y0, x1, y1 )
+function line4( x0, y0, x1, y1 )
 {
     var x, y = y0;
     var color = [0,0,255,128]; // blue
@@ -304,9 +339,9 @@ function line3( x0, y0, x1, y1 )
     }
 }
 
-// floating-point
+// floating-point: m=2dy, e > dx
 // ========================================================================
-function line4( x0, y0, x1, y1 )
+function line5( x0, y0, x1, y1 )
 {
     var x, y = y0;
     var color = [0,0,255,128]; // blue
@@ -331,9 +366,9 @@ function line4( x0, y0, x1, y1 )
     }
 }
 
-// floating-point
+// floating-point: negdx
 // ========================================================================
-function line5( x0, y0, x1, y1 )
+function line6( x0, y0, x1, y1 )
 {
     var x, y = y0;
     var color = [0,255,0,128]; // green
@@ -410,25 +445,70 @@ function linej( x0, y0, x1, y1 )
     }
 }
 
+function onLine1()
+{
+    update( LINE_FLOAT_TRUNC );
+}
+
+function onLine2()
+{
+    update( LINE_FLOAT_ROUND );
+}
+
+function onLine3()
+{
+    update( LINE_FLOAT_HALFE );
+}
+
+function onLine4()
+{
+    update( LINE_FLOAT_ONE_E );
+}
+
+function onLine5()
+{
+    update( LINE_FLOAT_ONE_E );
+}
+
+function onLineI()
+{
+    update( LINE_INT_G0 );
+}
+
+function onLineJ()
+{
+    update( LINE_INT_GE );
+}
+
 function onLoad()
 {
     init();
-    clear();
 
+    onLineJ();
+}
+
+function update( type )
+{
+    line = type;
+
+    clear();
+    get();
     grid( [128,128,128,255] ); draw();
 
     var x0 = 10, y0 = 20;
     var x1 = 40, y1 = 30;
 
-// Uncomment 1, 2, or all 3
-      line0( x0, y0, x1, y1 ); get();
-//    line1( x0, y0, x1, y1 ); draw(); // float
-//    line2( x0, y0, x1, y1 ); draw(); // float
-//    line3( x0, y0, x1, y1 ); draw(); // float
-//    line4( x0, y0, x1, y1 ); draw(); // float
-//    line5( x0, y0, x1, y1 ); draw(); // float
-//    linei( x0, y0, x1, y1 ); draw(); // int
-      linej( x0, y0, x1, y1 ); draw(); // int
+    line0( x0, y0, x1, y1 ); get();
+
+    if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1 ); draw(); // float: truncate
+    if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1 ); draw(); // float: round
+    if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1 ); draw(); // float: e > 0.5
+    if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1 ); draw(); // float: e > 1
+    if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1 ); draw(); // float: m = 2*dy
+    if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1 ); draw(); // float
+
+    if (type == LINE_INT_G0) linei( x0, y0, x1, y1 ); draw(); // int: >  0
+    if (type == LINE_INT_GE) linej( x0, y0, x1, y1 ); draw(); // int: >= 0
 
     var black = [ 128, 128, 128, -64 ];
     zoompixel( x0, y0, subpixel, black ); draw();
