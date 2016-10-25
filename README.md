@@ -2,6 +2,12 @@
 
 Another way to derive the line drawing algorithm is incrementally.
 
+Assumptions:
+
+* x0 < x1
+* y0 < y1
+* Line has slope, `m` = dy/dx, less then equal to 45 degrees -- in the first octant.
+
 Let's start with a "dumb" line drawing.
 
 ```
@@ -29,17 +35,21 @@ Sometimes we increment y, sometimes we don't:
 If we use floating-point this becomes easy if we keep track of the error:
 
 ```
- e = 0;
- m = dy/dx;
- for x = X0 to X1
-   putpixel( x, y )
-   e += m;
-   if (e > 0.5)
+function line( x0, y0, x1, y1 )
+  dy = y1 - y0;
+  dx = x1 - x0;
+
+  e = 0;
+  m = dy/dx; // traditional slope
+  for x = X0 to X1
+    putpixel( x, y )
+    e += m;
+    if (e > 0.5)
       e = e - 1
       y = y + 1
 ```
 
-We want to get rid of that 0.5 and use integers
+We want to get rid of that 0.5. We multiply `m` by 2:
 
 ```
  e = 0;
