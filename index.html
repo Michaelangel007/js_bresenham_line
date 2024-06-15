@@ -711,14 +711,14 @@ function update( type )
 
     line0( x0, y0, x1, y1, [ 128, 128, 128, 128 ] ); get(); //colors[ next ]
 
-    if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1, colors[type] ); draw(); // float: truncate
-    if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1, colors[type] ); draw(); // float: round
-    if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1, colors[type] ); draw(); // float: e > 0.5
-    if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1, colors[type] ); draw(); // float: e > 1
-    if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1, colors[type] ); draw(); // float: e > dx
-    if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1, colors[type] ); draw(); // float: e > 0
-    if (type == LINE_INT_G0     ) linei( x0, y0, x1, y1, colors[4] ); draw(); // int: >  0
-    if (type == LINE_INT_GE     ) linej( x0, y0, x1, y1, colors[5] ); draw(); // int: >= 0
+    if (type == LINE_FLOAT_TRUNC) { line1( x0, y0, x1, y1, colors[type] ); draw(); } // float: truncate
+    if (type == LINE_FLOAT_ROUND) { line2( x0, y0, x1, y1, colors[type] ); draw(); } // float: round
+    if (type == LINE_FLOAT_HALFE) { line3( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 0.5
+    if (type == LINE_FLOAT_ONE_E) { line4( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 1
+    if (type == LINE_FLOAT_M_2DY) { line5( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > dx
+    if (type == LINE_FLOAT_E_G_0) { line6( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 0
+    if (type == LINE_INT_G0     ) { linei( x0, y0, x1, y1, colors[4]    ); draw(); } // int: >  0
+    if (type == LINE_INT_GE     ) { linej( x0, y0, x1, y1, colors[5]    ); draw(); } // int: >= 0
 
     zoompixel( x0, y0, subpixel, black ); draw();
     zoompixel( x1, y1, subpixel, black ); draw();
