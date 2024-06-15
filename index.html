@@ -495,8 +495,9 @@ function onExample( which )
     y1 = Examples[ which*4 + 3];
 
     x0 = gridClampX( x0 );
-    y0 = gridClampX( y0 );
-    x1 = gridClampY( x1 );
+    x1 = gridClampX( x1 );
+
+    y0 = gridClampY( y0 );
     y1 = gridClampY( y1 );
 
     update( line );
