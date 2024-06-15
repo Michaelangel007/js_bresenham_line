@@ -7,6 +7,25 @@ https://cdn.rawgit.com/Michaelangel007/js_bresenham_line/master/index.html
 -->
 <html>
     <head>
+<style>
+    .up
+    {
+        position: relative;
+        top        : 0px;
+        left       : 0px;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+        font-weight: normal;
+    }
+
+    .down
+    {
+        position: relative;
+        top: 2px;
+        left: 2px;
+        box-shadow: none;
+        font-weight: bold;
+    }
+</style>
 <script>
 "use strict";
 
@@ -278,6 +297,59 @@ References:
         return y;
     }
 
+// Utility
+    // Inspired from: https://gist.github.com/danprince/05cb72052484355f3adc
+    function _addClasses( elem, classnames )
+    {
+        var userClasses = classnames.split( ' ' );
+        if( userClasses.length )
+            userClasses.forEach( classname =>
+                {
+                    var classes = elem.getAttribute( 'class' );
+                    if (classes === null)
+                    {
+                        elem.setAttribute( 'class', classname );
+                    }
+                    else
+                    {
+                        var list    = classes.split( ' ' );
+                        var offset  = list.indexOf( classname );
+                        if (offset < 0)
+                        {
+                            list.push( classname );
+                            elem.setAttribute( 'class', list.join( ' ' ) );
+                        }
+                    }
+                }
+            );
+    }
+
+    // Inspired from: https://gist.github.com/danprince/05cb72052484355f3adc
+    function _removeClasses( elem, classnames )
+    {
+        var userClasses = classnames.split( ' ' );
+        if( userClasses.length )
+            userClasses.forEach( classname =>
+                {
+                    var classes = elem.getAttribute( 'class' );
+                    if (classes === null)
+                    {
+                        list = [];
+                    }
+                    else
+                    {
+                        var list    = classes.split( ' ' );
+                        var offset  = list.indexOf( classname );
+                        if (offset >= 0)
+                            list.splice( offset, 1 );
+                    }
+                    elem.setAttribute( 'class', list.join( ' ' ) );
+                }
+            );
+    }
+
+
+
 // ========================================================================
 function init()
 {
@@ -510,6 +582,7 @@ function onExample( which )
     y1 = gridClampY( y1 );
 
     update( line );
+    uiUpdateButtonStates( which, max, 'buttonEx' );
 }
 
 function onLine1()
@@ -701,9 +774,31 @@ function onLoad()
     onLineJ();
 }
 
+function uiUpdateButtonStates( selected, total, baseName )
+{
+    for( var button = 0; button < total; button++ )
+    {
+        var elem = document.getElementById( baseName + button );
+        var css = elem.getAttribute( 'class' );
+
+        if (button == selected)
+        {
+            _removeClasses( elem, 'up' );
+            _addClasses( elem, 'down' ) ;
+        }
+        else
+        {
+            _removeClasses( elem, 'down' );
+            _addClasses( elem, 'up' ) ;
+        }
+    }
+}
+
 function update( type )
 {
     line = type;
+
+    uiUpdateButtonStates( type, LINE_INT_GE+1, 'buttonLine' );
 
     var black  =  [ 128, 128, 128, -64 ];
     var colors = 
@@ -751,21 +846,25 @@ function update( type )
         <td>
         </tr>
     </table>
-<button id="buttonLine1" onclick="onLine1()">Float Round        </button>
-<button id="buttonLine2" onclick="onLine2()">Float Trunc        </button>
-<button id="buttonLine3" onclick="onLine3()">Float e &gt; &half;</button>
-<button id="buttonLine4" onclick="onLine4()">Float e &gt; 1     </button>
-<button id="buttonLine5" onclick="onLine5()">Float e &gt; dx    </button>
-<button id="buttonLine6" onclick="onLine6()">Float e &gt; 0     </button>
-<button id="buttonLineI" onclick="onLineI()">Int &gt; 0         </button>
-<button id="buttonLineJ" onclick="onLineJ()">Int &gt;= 0        </button>
-<br>
+    <table>
+        <tr><td>
+<button id="buttonLine0" onclick="onLine1()">Float Round        </button>
+<button id="buttonLine1" onclick="onLine2()">Float Trunc        </button>
+<button id="buttonLine2" onclick="onLine3()">Float e &gt; &half;</button>
+<button id="buttonLine3" onclick="onLine4()">Float e &gt; 1     </button>
+<button id="buttonLine4" onclick="onLine5()">Float e &gt; dx    </button>
+<button id="buttonLine5" onclick="onLine6()">Float e &gt; 0     </button>
+<button id="buttonLine6" onclick="onLineI()">Int &gt; 0         </button>
+<button id="buttonLine7" onclick="onLineJ()">Int &gt;= 0        </button>
+        </td></tr><tr><td>
 <button id='buttonEx0' onclick='onExample(0)'>Line 0</button>
 <button id='buttonEx1' onclick='onExample(1)'>Line 1</button>
 <button id='buttonEx2' onclick='onExample(2)'>Line 2</button>
 <button id='buttonEx3' onclick='onExample(3)'>Line 3</button>
 <button id='buttonEx4' onclick='onExample(4)'>Line 4</button>
 <button id='buttonEx5' onclick='onExample(5)'>Line 5</button>
+        </td></tr>
+    </table>
 <h2>Proof of Bresenham / Mid-Point formula</h1>
 <pre>
 Another way to derive the line drawing algorithm is incrementally.
