@@ -43,9 +43,12 @@ References:
     var w;
     var h;
 
-    var sx = 10;
-    var sy = 10;
+    var sx = 20; // Scale or Zoom
+    var sy = 20;
 
+    // Line end points
+    var x0 = 10, y0 = 20;
+    var x1 = 40, y1 = 30;
 
 // Debug
 
@@ -238,6 +241,12 @@ function init()
 
     image   = context.createImageData( w, h );
     data    = image.data;
+
+    var gw = (w-1)/sx | 0; // w = 501 - 1 / 10 -> 50
+    var gh = (h-1)/sy | 0; // h = 401 - 1 / 10 -> 40
+
+    x0 = (gw /  5)|0, y0 = (2*gh/4)|0;
+    x1 = (gw - x0)|0, y1 = (3*gh/4)|0;
 }
 
 // ========================================================================
@@ -658,9 +667,6 @@ function update( type )
     clear();
     get();
     grid( [192,192,192,255] ); draw();
-
-    var x0 = 10, y0 = 20;
-    var x1 = 40, y1 = 30;
 
     line0( x0, y0, x1, y1, [ 128, 128, 128, 128 ] ); get(); //colors[ next ]
 
