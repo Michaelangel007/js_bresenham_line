@@ -230,11 +230,11 @@ References:
     }
 
 // Grid
+
+    // example: grid( [192,192,192,255] );
     // ========================================================================
     function grid( color )
     {
-        var u = gZoomX-1;
-        var v = gZoomY-1;
         var x,y;
 
         for( y = 0; y < h; y += gZoomY )
@@ -242,6 +242,26 @@ References:
 
         for( x = 0 ; x < w; x += gZoomX )
             vline( x, color );
+    }
+
+    // example: gridMajorMinor( [192,192,192,255], [128,128,255,255], 8 );
+    function gridMajorMinor( minorColor, majorColor, majorSpacing )
+    {
+        var u = 0,
+            v = 0,
+            x,y;
+
+        for( y = 0; y < h; y += gZoomY, ++v )
+            if (v % majorSpacing == 0)
+                hline( y, majorColor );
+            else
+                hline( y, minorColor );
+
+        for( x = 0 ; x < w; x += gZoomX, ++u )
+            if (u % majorSpacing == 0)
+                vline( x, majorColor );
+            else
+                vline( x, minorColor );
     }
 
     function gridClampX( x )
@@ -699,7 +719,8 @@ function update( type )
 
     clear();
     get();
-    grid( [192,192,192,255] ); draw();
+    //grid( [192,192,192,255] ); draw();
+    gridMajorMinor( [192,192,192,255], [128,128,255,255], 8 ); draw();
 
     line0( x0, y0, x1, y1, [ 128, 128, 128, 128 ] ); get(); //colors[ next ]
 
