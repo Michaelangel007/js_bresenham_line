@@ -726,24 +726,24 @@ Let's start with a "dumb" line drawing:
 
 function line( x0, y0, x1, y1 )
   y = y0;
-  for x = X0 to X1
-    putpixel( x, y )
+  for x = x0 to x1
+      putpixel( x, y )
 
 Unfortunately this just draws a horizontal line. :-/
 What we want is this:
 
   y = y0;
-  for x = X0 to X1
-    putpixel( x, y )
-    figure out new y
+  for x = x0 to x1
+      putpixel( x, y )
+      figure out new y
 
 Sometimes we increment y, sometimes we don't:
 
   y = y0;
-  for x = X0 to X1
-    putpixel( x, y )
-    if( incrementY )
-      y = y + 1
+  for x = x0 to x1
+      putpixel( x, y )
+      if( incrementY )
+          y = y + 1
 
 If we use floating-point this becomes easy if we keep track of the error:
 
@@ -754,12 +754,12 @@ function line( x0, y0, x1, y1 )
 
   e = 0;
   m = dy/dx; // traditional slope
-  for x = X0 to X1
-    putpixel( x, y )
-    e += m;
-    if (e > 0.5)
-      e = e - 1
-      y = y + 1
+  for x = x0 to x1
+      putpixel( x, y )
+      e += m;
+      if (e > 0.5)
+          e = e - 1
+          y = y + 1
 
 We want to get rid of that 0.5. We multiply m by 2:
 
@@ -769,12 +769,12 @@ We want to get rid of that 0.5. We multiply m by 2:
 
   e = 0;
   m = 2*dy/dx;
-  for x = X0 to X1
-    putpixel( x, y )
-    e += m;
-    if (e > 1)
-      e = e - 2
-      y = y + 1
+  for x = x0 to x1
+      putpixel( x, y )
+      e += m;
+      if (e > 1)
+          e = e - 2
+          y = y + 1
 
 We also want to get rid of that division -- we need to multiply all the terms by dx;
 this means all terms involving m need to be updated:
@@ -785,12 +785,12 @@ this means all terms involving m need to be updated:
 
   e = 0;
   m = 2*dy;
-  for x = X0 to X1
-    putpixel( x, y )
-    e += m;
-    if (e > dx)
-      e = e - 2*dx
-      y = y + 1
+  for x = x0 to x1
+      putpixel( x, y )
+      e += m;
+      if (e > dx)
+          e = e - 2*dx
+          y = y + 1
 
 We also want to compare the sign instead of 'e > dx' -- we can change that by offsetting the initial term.
 
@@ -800,12 +800,12 @@ We also want to compare the sign instead of 'e > dx' -- we can change that by of
 
   e = -dx;
   m = 2*dy;
-  for x = X0 to X1
-    putpixel( x, y )
-    e += m;
-    if (e > 0)
-      e = e - 2*dx
-      y = y + 1
+  for x = x0 to x1
+      putpixel( x, y )
+      e += m;
+      if (e > 0)
+          e = e - 2*dx
+          y = y + 1
 
 QED.
 </pre>
