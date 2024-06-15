@@ -39,16 +39,26 @@ References:
     var line = LINE_FLOAT_TRUNC;
 
 // Globals
-    var canvas, context, image, data;
-    var w;
-    var h;
-
-    var sx = 20; // Scale or Zoom
-    var sy = 20;
+    var canvas, context, image, data,
+        w,
+        h,
+        gCellW,
+        gCellH,
+        gZoomX = 16,
+        gZoomY = 16;
 
     // Line end points
     var x0 = 10, y0 = 20;
     var x1 = 40, y1 = 30;
+
+    var Examples =
+    [//x0,y0, x1,y1
+       10,20, 40,30, // 0
+        0, 5, 31, 7, // 1
+        0, 8, 31,11, // 2
+        0,11, 31,15, // 3
+        0,14, 31,22  // 4
+    ];
 
 // Debug
 
@@ -189,14 +199,14 @@ References:
     function zoompixel( x, y, op, color )
     {
         var i, j;
-        var u = sx-1;
-        var v = sy-1;
+        var u = gZoomX-1;
+        var v = gZoomY-1;
 
         for( j = 0; j < v; j++ )
         {
             for( i = 0 ; i < u; i++ )
             {
-                op( x*sx + i +  1, y*sy + j + 1, color ); // +1,+1 for grid border
+                op( x*gZoomX + i +  1, y*gZoomY + j + 1, color ); // +1,+1 for grid border
             }
         }
     }
@@ -220,15 +230,29 @@ function hline( y, color )
 // ========================================================================
 function grid( color )
 {
-    var u = sx-1;
-    var v = sy-1;
+    var u = gZoomX-1;
+    var v = gZoomY-1;
     var x,y;
 
-    for( y = 0; y < h; y += sy )
+    for( y = 0; y < h; y += gZoomY )
         hline( y, color );
 
-    for( x = 0 ; x < w; x += sx )
+    for( x = 0 ; x < w; x += gZoomX )
         vline( x, color );
+}
+
+function gridClampX( x )
+{
+    if (x <       0) x = 0;
+    if (x >= gCellW) x = gCellW - 1;
+    return x;
+}
+
+function gridClampY( y )
+{
+    if (y <       0) y = 0;
+    if (y >= gCellH) y = gCellH - 1;
+    return y;
 }
 
 // ========================================================================
@@ -242,11 +266,11 @@ function init()
     image   = context.createImageData( w, h );
     data    = image.data;
 
-    var gw = (w-1)/sx | 0; // w = 501 - 1 / 10 -> 50
-    var gh = (h-1)/sy | 0; // h = 401 - 1 / 10 -> 40
+    gCellW = (w-1)/gZoomX | 0; // w = 501 - 1 / 10 -> 50
+    gCellH = (h-1)/gZoomY | 0; // h = 401 - 1 / 10 -> 40
 
-    x0 = (gw /  5)|0, y0 = (2*gh/4)|0;
-    x1 = (gw - x0)|0, y1 = (3*gh/4)|0;
+    x0 = (gCellW /  5)|0, y0 = (2*gCellH/4)|0;
+    x1 = (gCellW - x0)|0, y1 = (3*gCellH/4)|0;
 }
 
 // ========================================================================
@@ -254,11 +278,11 @@ function line0( x0, y0, x1, y1, color )
 {
     context.beginPath();
     context.strokeStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + color[3]/255 + ')'; // "#444444";
-    context.lineWidth = sx;
+    context.lineWidth = gZoomX;
     context.imageSmoothingEnabled = false;
 
-    context.moveTo( x0*sx+sx/2, y0*sy+sy/2 );
-    context.lineTo( x1*sx+sx/2, y1*sy+sy/2 );
+    context.moveTo( x0*gZoomX + gZoomX/2, y0*gZoomY + gZoomY/2 );
+    context.lineTo( x1*gZoomX + gZoomX/2, y1*gZoomY + gZoomY/2 );
     context.stroke();
 }
 
@@ -458,6 +482,25 @@ function linej( x0, y0, x1, y1, color )
 }
 
 // UI ___________________________________________________________________
+
+function onExample( which )
+{
+    var max = Examples.length / 4;
+    if (which < 0) which = 0;
+    if (which > max) which = max-1;
+
+    x0 = Examples[ which*4 + 0];
+    y0 = Examples[ which*4 + 1];
+    x1 = Examples[ which*4 + 2];
+    y1 = Examples[ which*4 + 3];
+
+    x0 = gridClampX( x0 );
+    y0 = gridClampX( y0 );
+    x1 = gridClampY( x1 );
+    y1 = gridClampY( y1 );
+
+    update( line );
+}
 
 function onLine1()
 {
@@ -688,7 +731,7 @@ function update( type )
     <table cellpadding='0'>
         <tr>
         <td valign='top'>
-            <canvas id='canvas' width='501' height=401'>
+            <canvas id='canvas' width='641' height='481'>
             HTML5 Canvas not supported!
             </canvas>
         </td>
@@ -705,6 +748,12 @@ function update( type )
 <button id="buttonLine6" onclick="onLine6()">Float e &gt; 0     </button>
 <button id="buttonLineI" onclick="onLineI()">Int &gt; 0         </button>
 <button id="buttonLineJ" onclick="onLineJ()">Int &gt;= 0        </button>
+<br>
+<button id='buttonEx0' onclick='onExample(0)'>Line 0</button>
+<button id='buttonEx1' onclick='onExample(1)'>Line 1</button>
+<button id='buttonEx2' onclick='onExample(2)'>Line 2</button>
+<button id='buttonEx3' onclick='onExample(3)'>Line 3</button>
+<button id='buttonEx4' onclick='onExample(4)'>Line 4</button>
 <h2>Proof of Bresenham / Mid-Point formula</h1>
 <pre>
 Another way to derive the line drawing algorithm is incrementally.
