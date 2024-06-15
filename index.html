@@ -57,7 +57,8 @@ References:
         0, 5, 31, 7, // 1
         0, 8, 31,11, // 2
         0,11, 31,15, // 3
-        0,14, 31,22  // 4
+        0,14, 31,22, // 4
+        8,15, 32,22  // 5
     ];
 
 // Debug
@@ -684,7 +685,7 @@ function onLineJ()
 function onLoad()
 {
     init();
-
+    onExample(5);
     onLineJ();
 }
 
@@ -751,6 +752,7 @@ function update( type )
 <button id='buttonEx2' onclick='onExample(2)'>Line 2</button>
 <button id='buttonEx3' onclick='onExample(3)'>Line 3</button>
 <button id='buttonEx4' onclick='onExample(4)'>Line 4</button>
+<button id='buttonEx5' onclick='onExample(5)'>Line 5</button>
 <h2>Proof of Bresenham / Mid-Point formula</h1>
 <pre>
 Another way to derive the line drawing algorithm is incrementally.
