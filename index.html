@@ -633,18 +633,18 @@ function onLineI()
     var text = "" +
 "    var dx = x1 - x0;\n"+
 "    var dy = y1 - y0;\n"+
-"    var s  = 2*dy - dx;\n"+
+"    var s  = -dx;\n"+
 "\n"+
 "    for( x = x0; x <= x1; ++x )\n"+
 "    {\n"+
 "        pixel( x, y );\n"+
 "\n"+
+"        s += 2*dy;\n"+
 "        if (s > 0)\n"+
 "        {\n"+
-"            s -= dx;\n"+
+"            s -= 2*dx;\n"+
 "            y++;\n"+
 "        }\n"+
-"        s += dy;\n"+
 "    }\n"+
 "";
     output( text );
@@ -657,18 +657,18 @@ function onLineJ()
     var text = "" +
 "    var dx = x1 - x0;\n"+
 "    var dy = y1 - y0;\n"+
-"    var s  = 2*dy - dx;\n"+
+"    var s  = -dx;\n"+
 "\n"+
 "    for( x = x0; x <= x1; ++x )\n"+
 "    {\n"+
 "        pixel( x, y );\n"+
 "\n"+
+"        s += 2*dy;\n"+
 "        if (s >= 0)\n"+
 "        {\n"+
-"            s -= dx;\n"+
+"            s -= 2*dx;\n"+
 "            y++;\n"+
 "        }\n"+
-"        s += dy;\n"+
 "    }\n"+
 "";
     output( text );
