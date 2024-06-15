@@ -432,18 +432,18 @@ function linei( x0, y0, x1, y1, color )
 
     var dx = x1 - x0;
     var dy = y1 - y0;
-    var s  = 2*dy - dx;
+    var s  = -dx;
 
     for( x = x0; x <= x1; ++x )
     {
         zoompixel( x, y, addpixel, color );
 
+        s += 2*dy;
         if (s > 0)
         {
-            s -= dx;
+            s -= 2*dx;
             y++;
         }
-        s += dy;
     }
 }
 
@@ -455,20 +455,18 @@ function linej( x0, y0, x1, y1, color )
 
     var dx = x1 - x0;
     var dy = y1 - y0;
-    var s  = 2*dy - dx;
+    var s  = -dx;
 
     for( x = x0; x <= x1; ++x )
     {
-        //setpixel( x, y, color );
-        //addpixel( x, y, color );
         zoompixel( x, y, addpixel, color );
 
+        s += 2*dy;
         if (s >= 0)
         {
-            s -= dx;
+            s -= 2*dx;
             y++;
         }
-        s += dy;
     }
 }
 
