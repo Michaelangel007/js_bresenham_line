@@ -48,8 +48,8 @@ References:
         gZoomY = 16;
 
     // Line end points
-    var x0 = 10, y0 = 20;
-    var x1 = 40, y1 = 30;
+    var x0, y0,
+        x1, y1;
 
     var Examples =
     [//x0,y0, x1,y1
@@ -211,49 +211,51 @@ References:
         }
     }
 
-function vline( x, color )
-{
-    var y;
+// Line
+    function vline( x, color )
+    {
+        var y;
 
-    for( y = 0; y < h; y++ )
-        putpixel( x, y, color );
-}
+        for( y = 0; y < h; y++ )
+            putpixel( x, y, color );
+    }
 
-function hline( y, color )
-{
-    var x;
+    function hline( y, color )
+    {
+        var x;
 
-    for( x = 0 ; x < w; x++ )
-        putpixel( x, y, color );
-}
+        for( x = 0 ; x < w; x++ )
+            putpixel( x, y, color );
+    }
 
-// ========================================================================
-function grid( color )
-{
-    var u = gZoomX-1;
-    var v = gZoomY-1;
-    var x,y;
+// Grid
+    // ========================================================================
+    function grid( color )
+    {
+        var u = gZoomX-1;
+        var v = gZoomY-1;
+        var x,y;
 
-    for( y = 0; y < h; y += gZoomY )
-        hline( y, color );
+        for( y = 0; y < h; y += gZoomY )
+            hline( y, color );
 
-    for( x = 0 ; x < w; x += gZoomX )
-        vline( x, color );
-}
+        for( x = 0 ; x < w; x += gZoomX )
+            vline( x, color );
+    }
 
-function gridClampX( x )
-{
-    if (x <       0) x = 0;
-    if (x >= gCellW) x = gCellW - 1;
-    return x;
-}
+    function gridClampX( x )
+    {
+        if (x <       0) x = 0;
+        if (x >= gCellW) x = gCellW - 1;
+        return x;
+    }
 
-function gridClampY( y )
-{
-    if (y <       0) y = 0;
-    if (y >= gCellH) y = gCellH - 1;
-    return y;
-}
+    function gridClampY( y )
+    {
+        if (y <       0) y = 0;
+        if (y >= gCellH) y = gCellH - 1;
+        return y;
+    }
 
 // ========================================================================
 function init()
@@ -269,8 +271,10 @@ function init()
     gCellW = (w-1)/gZoomX | 0; // w = 501 - 1 / 10 -> 50
     gCellH = (h-1)/gZoomY | 0; // h = 401 - 1 / 10 -> 40
 
-    x0 = (gCellW /  5)|0, y0 = (2*gCellH/4)|0;
-    x1 = (gCellW - x0)|0, y1 = (3*gCellH/4)|0;
+    //x0 = (gCellW /  5)|0, y0 = (2*gCellH/4)|0;
+    //x1 = (gCellW - x0)|0, y1 = (3*gCellH/4)|0;
+    //console.info( x0, y0 );
+    //console.info( x1, y1 );
 }
 
 // ========================================================================
@@ -290,7 +294,7 @@ function line0( x0, y0, x1, y1, color )
 // ========================================================================
 function line1( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    var x, y = y0|0;
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -298,9 +302,7 @@ function line1( x0, y0, x1, y1, color )
 
     for( x = x0; x <= x1; ++x )
     {
-        //setpixel( x, y, color );
-        //addpixel( x, y, color );
-        zoompixel( x, Math.round(y), putpixel, color ); // truncate to integer: y|0
+        zoompixel( x, Math.round(y), putpixel, color );
 
         y += m;
     }
@@ -310,7 +312,7 @@ function line1( x0, y0, x1, y1, color )
 // ========================================================================
 function line2( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    var x, y = y0|0;
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -318,9 +320,7 @@ function line2( x0, y0, x1, y1, color )
 
     for( x = x0; x <= x1; ++x )
     {
-        //setpixel( x, y, color );
-        //addpixel( x, y, color );
-        zoompixel( x, y|0, putpixel, color ); // truncate to integer: y|0
+        zoompixel( x, y|0, putpixel, color );
 
         y += m;
     }
@@ -330,7 +330,7 @@ function line2( x0, y0, x1, y1, color )
 // ========================================================================
 function line3( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    var x, y = y0|0;
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -341,7 +341,7 @@ function line3( x0, y0, x1, y1, color )
     {
         //setpixel( x, y, color );
         //addpixel( x, y, color );
-        zoompixel( x, y, putpixel, color ); // truncate to integer: y|0
+        zoompixel( x, y, putpixel, color );
 
         e += m;
         if (e > 0.5)
@@ -356,7 +356,7 @@ function line3( x0, y0, x1, y1, color )
 // ========================================================================
 function line4( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    var x, y = y0|0;
 
     var dx = x1 - x0;
     var dy = y1 - y0;
@@ -365,9 +365,7 @@ function line4( x0, y0, x1, y1, color )
 
     for( x = x0; x <= x1; ++x )
     {
-        //setpixel( x, y, color );
-        //addpixel( x, y, color );
-        zoompixel( x, y, putpixel, color ); // truncate to integer: y|0
+        zoompixel( x, y, putpixel, color );
 
         e += m;
         if (e > 1)
@@ -391,8 +389,6 @@ function line5( x0, y0, x1, y1, color )
 
     for( x = x0; x <= x1; ++x )
     {
-        //setpixel( x, y, color );
-        //addpixel( x, y, color );
         zoompixel( x, y, putpixel, color );
 
         e += m;
@@ -486,7 +482,7 @@ function linej( x0, y0, x1, y1, color )
 function onExample( which )
 {
     var max = Examples.length / 4;
-    if (which < 0) which = 0;
+    if (which <   0) which = 0;
     if (which > max) which = max-1;
 
     x0 = Examples[ which*4 + 0];
