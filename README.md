@@ -1,6 +1,6 @@
 # Bresenham's Line Derivation
 
-* [Live Demo (HTML Preview)](https://michaelangel007.github.io/js_bresenham_line/)
+* [Live Demo](https://michaelangel007.github.io/js_bresenham_line/)
 
 See Live Demo for proof.
 
