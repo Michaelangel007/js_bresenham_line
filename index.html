@@ -1028,6 +1028,14 @@ function update( type )
     zoompoint( x0, y0, putpixel, colorVertexL, 3, 3 );
     zoompoint( x1, y1, putpixel, colorVertexR, 3, 3 );
     draw();
+
+    var coords = document.getElementById( 'coords' );
+    coords.innerHTML =
+        "    <span style='color:" + colorArrayToRGB(colorVertexL) + ";'>Vertex 0</span>: " + pad(x0,2) + ", " + pad(y0,2) + "\n" +
+        "    <span style='color:" + colorArrayToRGB(colorVertexR) + ";'>Vertex 1</span>: " + pad(x1,2) + ", " + pad(y1,2) + "\n" +
+        "          dx:"  + pad(dx,3) + "  sx:" + pad(sx,3) + "  ax: " + pad(ax,2) + "\n" +
+        "          dy:"  + pad(dy,3) + "  sy:" + pad(sy,3) + "  ay: " + pad(ay,2) + "\n" +
+        "     dy < dx:"  + ((ay < ax) ? " YES" : " no");
 }
 </script>
     </head>
@@ -1040,7 +1048,10 @@ function update( type )
             </canvas>
         </td>
         <td valign='top'>
-            <pre id='output'></pre>
+            <table>
+                <tr><td valign='top'><span class='info' id='coords'></span><hr></td></tr>
+                <tr><td valign='top'><pre id='output'></pre></td></tr>
+            </table>
         <td>
         </tr>
     </table>
