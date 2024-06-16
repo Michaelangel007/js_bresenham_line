@@ -98,7 +98,7 @@ References:
         pre.innerHTML = text;
     }
 
-// FramebufferLINE_INT_G0
+// Framebuffer
 
     // ========================================================================
     function draw()
@@ -253,7 +253,7 @@ References:
     {
         var x;
 
-        for( x = 0 ; x < w; x++ )
+        for( x = 0; x < w; x++ )
             putpixel( x, y, color );
     }
 
@@ -268,7 +268,7 @@ References:
         for( y = 0; y < h; y += gZoomY )
             hline( y, color );
 
-        for( x = 0 ; x < w; x += gZoomX )
+        for( x = 0; x < w; x += gZoomX )
             vline( x, color );
     }
 
@@ -285,7 +285,7 @@ References:
             else
                 hline( y, minorColor );
 
-        for( x = 0 ; x < w; x += gZoomX, ++u )
+        for( x = 0; x < w; x += gZoomX, ++u )
             if (u % majorSpacing == 0)
                 vline( x, majorColor );
             else
@@ -296,14 +296,14 @@ References:
     {
         if (x <       0) x = 0;
         if (x >= gCellW) x = gCellW - 1;
-        return x;
+        return x|0;
     }
 
     function gridClampY( y )
     {
         if (y <       0) y = 0;
         if (y >= gCellH) y = gCellH - 1;
-        return y;
+        return y|0;
     }
 
 // Utility
