@@ -247,6 +247,33 @@ References:
         }
     }
 
+    // @param sizeX Between [0 .. ZoomX-1] inclusive
+    // @param sizeY Between [0 .. ZoomY-1] inclusive
+    // @param op   Function name: putpixel, addpixel, subpixel
+    // @param color Array of RGBA colors
+    // ========================================================================
+    function zoompoint( x, y, op, color, sizeX, sizeY )
+    {
+        sizeX = Math.max( Math.min( sizeX, gZoomX ), 0) | 0;
+        sizeY = Math.max( Math.min( sizeY, gZoomY ), 0) | 0;
+
+        var w = sizeX, // gZoomX-1
+            h = sizeY, // gZoomY-1
+
+            offsetX = (gZoomX - sizeX)*0.5 | 0,
+            offsetY = (gZoomY - sizeY)*0.5 | 0;
+
+        for( var j = 0; j < h; j++ )
+        {
+            var v = j+1 + offsetY; // +1,+1 for grid border
+            for( var i = 0; i < w; i++ )
+            {
+                var u = i+1 + offsetX; // +1,+1 for grid border
+                op( (x*gZoomX) + u, (y*gZoomY) + v, color );
+            }
+        }
+    }
+
 // Line
     function vline( x, color )
     {
