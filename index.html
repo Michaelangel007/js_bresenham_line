@@ -357,7 +357,24 @@ References:
             );
     }
 
+    // @param a Array: [r,g,b,a]
+    // @returns String: "(" r "," g "," b ")"
+    function colorArrayToRGB( rgba )
+    {
+        return "rgb(" + rgba[0] + "," + rgba[1] + "," + rgba[2] + ")";
+    }
 
+    // @param a Array: [r,g,b,a]
+    // @returns String: "(" r "," g "," b ")"
+    function colorArrayToRGBA( rgba )
+    {
+        return "rgba(" + rgba[0] + "," + rgba[1] + "," + rgba[2] + "," + (rgba[3]/255) + ")";
+    }
+
+    function pad( text, width )
+    {
+        return (Array(width+1).join(' ') + text).slice(-width);
+    }
 
 // ========================================================================
 function init()
