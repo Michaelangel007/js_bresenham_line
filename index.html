@@ -1342,7 +1342,7 @@ We also want to compare the sign instead of 'e > dx' -- we can change that by of
           e = e - 2*dx
           y = y + 1
 
-We can generalize the line drawing to handle all 8 octants:
+We can generalize the line drawing to handle all 8 octants ...
 
            Octant  dy < dx
  \  |  /       0   Yes
@@ -1353,6 +1353,66 @@ We can generalize the line drawing to handle all 8 octants:
   /5|6\        5   No
  /  |  \       6   No
                7   Yes
+
+by dividing it into two cases.
+
+That is, given:
+
+* x0, y0 - vertex 0
+* x1, y1 - vertex 1
+
+We first calculate the delta, sign of the delta, and absolute value of the delta:
+
+```js
+    dx = x1 - x0
+    dy = y1 - y0
+
+    sx = (dx < 0) ? -1 : +1
+    sy = (dy < 0) ? -1 : +1
+
+    ax = Math.abs(dx),
+    ay = Math.abs(dy),
+```
+
+The slope will tell us which octant we are in by inpsecting `ay < ax`:
+
+* Yes? Than slope is < 45&deg;, we in octants 0, 3, 4, 7,
+* No? Than slope is >= 45&deg;, we in octants 1, 2, 5, 6.
+
+We can pretend we are in octant 0 or 1 and have all 8 cases work if we make use of `sx`, `sy`, `ax`, and `ay`:
+
+```
+    if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
+    {
+        e = -ax;
+        for( x = 0; x <= ax; ++x )
+        {
+            setpixel( x0 + x*sx, color )
+
+            e += 2*ay;
+            if (e >= 0)
+            {
+                e -= 2*ax;
+                y += sy;
+            }
+        }
+    }
+    else // >= 45 degrees, Octants 1, 2, 5, 6
+    {
+        e = -ay;
+        for( y = 0; y <= ay; ++y )
+        {
+            setpixel( x, y0 + y*sy, color )
+
+            e += 2*ax;
+            if (e >= 0)
+            {
+                e -= 2*ay;
+                x += sx;
+            }
+        }
+    }
+```
 
 QED.
 </pre>
