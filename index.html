@@ -1354,14 +1354,14 @@ We can generalize the line drawing to handle all 8 octants ...
  /  |  \       6   No
                7   Yes
 
-by dividing it into two cases.
+... by dividing it into two cases -- if `dy < dx` but this will only work for octants 0 and 1.  Instead we need to look at the absolute value of dy compared to the absolute value of dx.
 
 That is, given:
 
-* x0, y0 - vertex 0
-* x1, y1 - vertex 1
+* Vertex 0: x0, y0
+* Vertex 1: x1, y1
 
-We first calculate the delta, sign of the delta, and absolute value of the delta:
+We first calculate the deltas, sign of the deltas, and absolute value of the deltas:
 
 ```js
     dx = x1 - x0
