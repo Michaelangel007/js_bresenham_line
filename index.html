@@ -1374,12 +1374,17 @@ We first calculate the deltas, sign of the deltas, and absolute value of the del
     ay = Math.abs(dy),
 ```
 
-The slope will tell us which octant we are in by inpsecting `ay < ax`:
+The slope will tell us which octant we are in  (0 or 1); we do this by inspecting `dy < dx`:
+
+* Yes? Than slope is < 45&deg;, have octant 0
+* No? Than slope is >= 45&deg;, have octant 1
+
+To generalize this to all octants we use `ay < ax` instead.
 
 * Yes? Than slope is < 45&deg;, we in octants 0, 3, 4, 7,
 * No? Than slope is >= 45&deg;, we in octants 1, 2, 5, 6.
 
-We can pretend we are in octant 0 or 1 and have all 8 cases work if we make use of `sx`, `sy`, `ax`, and `ay`:
+To extend this to all 8 casesf we make use of `sx`, `sy`, `ax`, and `ay` that we calculated above:
 
 ```
     if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
