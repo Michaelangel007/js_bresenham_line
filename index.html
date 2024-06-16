@@ -859,36 +859,71 @@ function update( type )
 
     uiUpdateButtonStates( type, LINE_INT_GE+1, 'buttonLine' );
 
-    var black  =  [ 128, 128, 128, -64 ];
-    var colors = 
+    var colorSkyBlue= [128,128,255,255];
+    var colorGray50 = [128,128,128,255];
+    var colorGray75 = [192,192,192,255];
+
+//  var colorVertexL = [   0, 255,   0, 255]; // Left = Green
+//  var colorVertexR = [ 255,   0,   0, 255]; // Right = Red
+    var colorVertexL = [  36, 158, 160, 255]; // Left = Teal
+    var colorVertexR = [ 250, 171,  54, 255]; // Right = Orange
+
+    var colorLines =
     [
-        [ 255,   0,   0, 128 ],
-        [ 255, 255,   0, 128 ],
-        [   0, 255,   0, 128 ],
-        [   0, 255, 255, 128 ],
-        [   0,   0, 255, 128 ],
-        [ 128,   0, 255, 128 ]
+        [ 255,   0,   0, 128 ], // R
+        [ 255, 255,   0, 128 ], //   Y
+        [   0, 255,   0, 128 ], // G
+        [   0, 255, 255, 128 ], //   C
+        [   0,   0, 255, 128 ], // B
+        [ 128,   0, 255, 128 ], //   M
+        [ 128,  64, 255, 128 ], //   M+
+        [   0,  64, 255, 128 ]  // B+
     ];
-    var next  = (type + 3) % colors.length;
+    var expectLineColor = [ 128, 128, 128, 128 ];
+    var actualLineColor = colorLines[type];
 
     clear();
     get();
-    //grid( [192,192,192,255] ); draw();
-    gridMajorMinor( [192,192,192,255], [128,128,255,255], 8 ); draw();
 
-    line0( x0, y0, x1, y1, [ 128, 128, 128, 128 ] ); get(); //colors[ next ]
+    gridMajorMinor( colorGray75, colorSkyBlue, 8 );
+    draw(); // Update canvas texels for blending
 
-    if (type == LINE_FLOAT_TRUNC) { line1( x0, y0, x1, y1, colors[type] ); draw(); } // float: truncate
-    if (type == LINE_FLOAT_ROUND) { line2( x0, y0, x1, y1, colors[type] ); draw(); } // float: round
-    if (type == LINE_FLOAT_HALFE) { line3( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 0.5
-    if (type == LINE_FLOAT_ONE_E) { line4( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 1
-    if (type == LINE_FLOAT_M_2DY) { line5( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > dx
-    if (type == LINE_FLOAT_E_G_0) { line6( x0, y0, x1, y1, colors[type] ); draw(); } // float: e > 0
-    if (type == LINE_INT_G0     ) { linei( x0, y0, x1, y1, colors[4]    ); draw(); } // int: >  0
-    if (type == LINE_INT_GE     ) { linej( x0, y0, x1, y1, colors[5]    ); draw(); } // int: >= 0
+    line0( x0, y0, x1, y1, expectLineColor );
+    get();
 
-    zoompixel( x0, y0, subpixel, black ); draw();
-    zoompixel( x1, y1, subpixel, black ); draw();
+    var x,
+        y,
+        dx = (x1 - x0)|0,
+        dy = (y1 - y0)|0,
+        sx = (dx < 0) ? -1 : +1,
+        sy = (dy < 0) ? -1 : +1,
+        ax = Math.abs( dx ),
+        ay = Math.abs( dy );
+
+    // Handle Trivial Cases
+    if (dx == 0) // Vertical Line
+        for( y = 0; y <= ay; ++y )
+            zoompoint( x0, y0 + y*sy, addpixel, actualLineColor, gZoomX - 2, gZoomY - 2 );
+    else
+    if (dy == 0) // Horizontal Line
+        for( x = 0; x <= ax; ++x )
+            zoompoint( x0 + x*sx, y0, addpixel, actualLineColor, gZoomX - 2, gZoomY - 2 );
+    else // Diagonal Cases
+    {
+        if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1, actualLineColor ); // float: truncate
+        if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1, actualLineColor ); // float: round
+        if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1, actualLineColor ); // float: e > 0.5
+        if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1, actualLineColor ); // float: e > 1
+        if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1, actualLineColor ); // float: e > dx
+        if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1, actualLineColor ); // float: e > 0
+        if (type == LINE_INT_G0     ) linei( x0, y0, x1, y1, actualLineColor ); // int: >  0
+        if (type == LINE_INT_GE     ) linej( x0, y0, x1, y1, actualLineColor ); // int: >= 0
+    }
+
+    // Draw colorized small dot at vertices to help visually tell which are left & right ends
+    zoompoint( x0, y0, putpixel, colorVertexL, 3, 3 );
+    zoompoint( x1, y1, putpixel, colorVertexR, 3, 3 );
+    draw();
 }
 </script>
     </head>
