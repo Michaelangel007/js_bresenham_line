@@ -666,9 +666,27 @@ function linej( x0, y0, x1, y1, color )
 
 // UI ___________________________________________________________________
 
+// Mouse moved
 function onDragMove( evt )
 {
-    uiDragUpdate( evt );
+    if (gbIsDragging)
+    {
+        uiDragUpdate( evt );
+
+        if (giSelected == 1)
+        {
+            x0 = gDragCellX;
+            y0 = gDragCellY;
+        }
+        else
+        if (giSelected == 2)
+        {
+            x1 = gDragCellX;
+            y1 = gDragCellY;
+        }
+
+        update( line );
+    }
 }
 
 // First mouse click the button is held down
@@ -688,21 +706,10 @@ function onDragStart( evt )
 function onDragStop( evt )
 {
     uiDragUpdate( evt );
+    onDragMove( evt );
 
-    if (giSelected == 1)
-    {
-        x0 = gDragCellX;
-        y0 = gDragCellY;
-    }
-    else
-    if (giSelected == 2)
-    {
-        x1 = gDragCellX;
-        y1 = gDragCellY;
-    }
+    giSelected = 0;
     gbIsDragging = false;
-
-    update( line );
 }
 
 function onExample( which )
