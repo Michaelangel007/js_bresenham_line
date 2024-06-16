@@ -70,6 +70,8 @@ References:
     var canvas, context, image, data,
         w,
         h,
+        gCanvasX,
+        gCanvasY,
         gCellW,
         gCellH,
         gZoomX = 16,
@@ -88,6 +90,23 @@ References:
         0,14, 31,22, // 4
         8,15, 32,22  // 5
     ];
+
+    // Touch/Drag
+    const SELECTED = Object.freeze(
+    {
+        SELECTED_NONE  : 0,
+        SELECTED_LEFT  : 1,
+        SELECTED_RIGHT : 2
+    });
+    var giSelected   = SELECTED.SELECTED_NONE,
+        gbIsDragging = false,
+        gDragCanvasX = undefined,
+        gDragCanvasY = undefined,
+        gDragCellX   = undefined,
+        gDragCellY   = undefined;
+
+    // Colors
+
 
 // Debug
 
@@ -424,10 +443,12 @@ function init()
     gCellW = (w-1)/gZoomX | 0; // w = 501 - 1 / 10 -> 50
     gCellH = (h-1)/gZoomY | 0; // h = 401 - 1 / 10 -> 40
 
-    //x0 = (gCellW /  5)|0, y0 = (2*gCellH/4)|0;
-    //x1 = (gCellW - x0)|0, y1 = (3*gCellH/4)|0;
-    //console.info( x0, y0 );
-    //console.info( x1, y1 );
+    var bound = canvas.getBoundingClientRect();
+    gCanvasX = bound.x | 0;
+    gCanvasY = bound.y | 0;
+
+    giSelected   = 0;
+    gbIsDragging = false;
 }
 
 // ========================================================================
@@ -602,26 +623,87 @@ function linei( x0, y0, x1, y1, color )
 // ========================================================================
 function linej( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    var x = x0|0, y = y0|0;
 
-    var dx = x1 - x0;
+    var dx = x1 - x0;            // Delta
     var dy = y1 - y0;
-    var s  = -dx;
+    var e                      ; // Error
+    var sx = (dx < 0) ? -1 : +1; // Sign
+    var sy = (dy < 0) ? -1 : +1;
+    var ax = Math.abs(dx);
+    var ay = Math.abs(dy);
 
-    for( x = x0; x <= x1; ++x )
+    if (ay >= ax) // >= 45 degrees, Octant II
     {
-        zoompixel( x, y, addpixel, color );
-
-        s += 2*dy;
-        if (s >= 0)
+        e = -ay; // -dy
+        for( y = 0; y <= ay; ++y )
         {
-            s -= 2*dx;
-            y++;
+            zoompixel( x, y0 + y*sy, addpixel, color );
+            e += 2*ax;
+            if (e >= 0)
+            {
+                e -= 2*ay;
+                x += sx; // x++
+            }
+        }
+    }
+    else // < 45 degrees, Octant I, III, V, VI
+    {
+        e = -ax;           // -dx
+        for( x = 0; x <= ax; ++x )
+        {
+            zoompixel( x0 + x*sx, y, addpixel, color );
+
+            e += 2*ay;     // dy
+            if (e >= 0)
+            {
+                e -= 2*ax; // dx
+                y += sy;   // y++;
+            }
         }
     }
 }
 
 // UI ___________________________________________________________________
+
+function onDragMove( evt )
+{
+    uiDragUpdate( evt );
+}
+
+// First mouse click the button is held down
+function onDragStart( evt )
+{
+    uiDragUpdate( evt );
+
+    giSelected = 0;
+    if (gDragCellX === x0 && gDragCellY == y0) giSelected = 1;
+    else
+    if (gDragCellX === x1 && gDragCellY == y1) giSelected = 2;
+
+    if( giSelected )
+        gbIsDragging = true;
+}
+
+function onDragStop( evt )
+{
+    uiDragUpdate( evt );
+
+    if (giSelected == 1)
+    {
+        x0 = gDragCellX;
+        y0 = gDragCellY;
+    }
+    else
+    if (giSelected == 2)
+    {
+        x1 = gDragCellX;
+        y1 = gDragCellY;
+    }
+    gbIsDragging = false;
+
+    update( line );
+}
 
 function onExample( which )
 {
@@ -826,11 +908,26 @@ function onLineJ()
     output( text );
 }
 
+//
 function onLoad()
 {
     init();
     onExample(5);
     onLineJ();
+
+    // Add callbacks to move end points
+    // Install callbacks
+    canvas.addEventListener( 'mousedown', onDragStart );
+    canvas.addEventListener( 'mousemove', onDragMove  );
+    canvas.addEventListener( 'mouseup'  , onDragStop  );
+}
+
+function uiDragUpdate( evt )
+{
+    gDragCanvasX = evt.x - gCanvasX,
+    gDragCanvasY = evt.y - gCanvasY,
+    gDragCellX = gridClampX( gDragCanvasX / gZoomX ),
+    gDragCellY = gridClampY( gDragCanvasY / gZoomY );
 }
 
 function uiUpdateButtonStates( selected, total, baseName )
