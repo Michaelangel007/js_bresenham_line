@@ -224,18 +224,25 @@ References:
         data[i+3] *= a / 255;
     }
 
+    // @param x,y  Grid coordinates
+    // @param op   Function name: putpixel, addpixel, subpixel
+    // @param color Array of RGBA colors
     // ========================================================================
     function zoompixel( x, y, op, color )
     {
-        var i, j;
-        var u = gZoomX-1;
-        var v = gZoomY-1;
+        var i, j,
+            u, v,
 
-        for( j = 0; j < v; j++ )
+            w = gZoomX-1,
+            h = gZoomY-1;
+
+        for( j = 0; j < h; j++ )
         {
-            for( i = 0 ; i < u; i++ )
+            v = j+1; // +1,+1 for grid border
+            for( i = 0; i < w; i++ )
             {
-                op( x*gZoomX + i +  1, y*gZoomY + j + 1, color ); // +1,+1 for grid border
+                u = i+1; // +1,+1 for grid border
+                op( (x*gZoomX) + u, (y*gZoomY) + v, color );
             }
         }
     }
