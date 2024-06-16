@@ -55,16 +55,19 @@ References:
 */
 
 // Tpes
-    var LINE_FLOAT_ROUND = 0;
-    var LINE_FLOAT_TRUNC = 1;
-    var LINE_FLOAT_HALFE = 2;
-    var LINE_FLOAT_ONE_E = 3;
-    var LINE_FLOAT_M_2DY = 4;
-    var LINE_FLOAT_E_G_0 = 5;
-    var LINE_INT_G0      = 6;
-    var LINE_INT_GE      = 7;
 
-    var line = LINE_FLOAT_TRUNC;
+    // Algorithm
+    var LINE_FLOAT_TRUNC  = 0;
+    var LINE_FLOAT_ROUND  = 1;
+    var LINE_FLOAT_E_HALF = 2;
+    var LINE_FLOAT_E_ONE  = 3;
+    var LINE_FLOAT_E_DX   = 4;
+    var LINE_FLOAT_E_ZERO = 5;
+    var LINE_INT_G0       = 6;
+    var LINE_INT_GE       = 7;
+    var LINE_NUM_TYPES    = 8;
+
+    var line = LINE_FLOAT_ROUND;
 
 // Globals
     var canvas, context, image, data,
@@ -88,7 +91,9 @@ References:
         0, 8, 31,11, // 2
         0,11, 31,15, // 3
         0,14, 31,22, // 4
-        8,15, 32,22  // 5
+        8,15, 32,22, // 5
+        8,15,  8, 0, // 6 Vertical
+        0, 0,  0, 0  // 7 Custom
     ];
 
     // Touch/Drag
@@ -451,147 +456,286 @@ function init()
     gbIsDragging = false;
 }
 
+// Reference Expected Line
 // ========================================================================
 function line0( x0, y0, x1, y1, color )
 {
     context.beginPath();
-    context.strokeStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + color[3]/255 + ')'; // "#444444";
-    context.lineWidth = gZoomX;
-    context.imageSmoothingEnabled = false;
+        context.strokeStyle = colorArrayToRGBA( color );
+        context.lineWidth = gZoomX;
+        context.imageSmoothingEnabled = false;
 
-    context.moveTo( x0*gZoomX + gZoomX/2, y0*gZoomY + gZoomY/2 );
-    context.lineTo( x1*gZoomX + gZoomX/2, y1*gZoomY + gZoomY/2 );
+        context.moveTo( x0*gZoomX + gZoomX/2, y0*gZoomY + gZoomY/2 );
+        context.lineTo( x1*gZoomX + gZoomX/2, y1*gZoomY + gZoomY/2 );
     context.stroke();
 }
 
+
+// Actual Line
 // floating-point: round
 // ========================================================================
-function line1( x0, y0, x1, y1, color )
+function drawLineFloatRound( x0, y0, x1, y1, color )
 {
-    var x = x0|0,
-        y = y0|0,
-        dx = x1 - x0,
-        dy = y1 - y0,
-        m  = dy / dx;
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        m;
 
-    for( x = x0; x <= x1; ++x )
+    if (dx === 0) // Handle trivial case of vertical line to avoid divide by zero
     {
-        zoompixel( x, Math.round(y), putpixel, color );
-
-        y += m;
+        for( y = 0; y <= ay; ++y )
+            zoompixel( x0, y0 + y*sy, putpixel, color );
+    }
+    else
+    {
+        if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
+        {
+            m = ay / ax;
+            for( x = 0; x <= ax; ++x )
+            {
+                zoompixel( x0 + x*sx, Math.round(y), putpixel, color );
+                y += m*sy;
+            }
+        }
+        else // >= 45 degrees, Octants 1, 2, 5, 6
+        {
+            m = ax / ay;
+            for( y = 0; y <= ay; ++y )
+            {
+                zoompixel( Math.round(x), y0 + y*sy, putpixel, color );
+                x += m*sx;
+            }
+        }
     }
 }
 
 // floating-point: truncate
 // ========================================================================
-function line2( x0, y0, x1, y1, color )
+function drawLineFloatTrunc( x0, y0, x1, y1, color )
 {
-    var x, y = y0|0;
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        m;
 
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = dy / dx;
-
-    for( x = x0; x <= x1; ++x )
+    if (dx === 0) // Handle trivial case of vertical line to avoid divide by zero
     {
-        zoompixel( x, y|0, putpixel, color );
-
-        y += m;
+        for( y = 0; y <= ay; ++y )
+            zoompixel( x0, y0 + y*sy, putpixel, color );
     }
-}
-
-// floating-point: half e
-// ========================================================================
-function line3( x0, y0, x1, y1, color )
-{
-    var x, y = y0|0;
-
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = dy / dx;
-    var e  = 0;
-
-    for( x = x0; x <= x1; ++x )
+    else
     {
-        zoompixel( x, y, putpixel, color );
-
-        e += m;
-        if (e > 0.5)
+        if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
         {
-            y++;
-            e -= 1;
+            m = ay / ax;
+            for( x = 0; x <= ax; ++x )
+            {
+                zoompixel( x0 + x*sx, y|0, putpixel, color );
+                y += m*sy;
+            }
+        }
+        else // >= 45 degrees, Octants 1, 2, 5, 6
+        {
+            m = ax / ay;
+            for( y = 0; y <= ay; ++y )
+            {
+                zoompixel( x|0, y0 + y*sy, putpixel, color );
+                x += m*sx;
+            }
         }
     }
 }
 
-// floating-point: full e
+// floating-point: e > 0.5
 // ========================================================================
-function line4( x0, y0, x1, y1, color )
+function drawLineFloatErrorHalf( x0, y0, x1, y1, color )
 {
-    var x, y = y0|0;
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e = 0, // Error
+        m;
 
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = 2 * dy / dx;
-    var e  = 0;
-
-    for( x = x0; x <= x1; ++x )
+    if (dx === 0) // Handle trivial case of vertical line to avoid divide by zero
     {
-        zoompixel( x, y, putpixel, color );
-
-        e += m;
-        if (e > 1)
+        for( y = 0; y <= ay; ++y )
+            zoompixel( x0, y0 + y*sy, putpixel, color );
+    }
+    else
+    {
+        if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
         {
-            y++;
-            e -= 2;
+            m = ay / ax;
+            for( x = 0; x <= ax; ++x )
+            {
+                zoompixel( x0 + x*sx, y, putpixel, color );
+
+                e += m;
+                if (e > 0.5)
+                {
+                    y += sy; // ++y
+                    e -= 1;
+                }
+            }
+        }
+        else // >= 45 degrees, Octants 1, 2, 5, 6
+        {
+            m = ax / ay;
+            for( y = 0; y <= ay; ++y )
+            {
+                zoompixel( x, y0 + y*sy, putpixel, color );
+
+                e += m;
+                if (e > 0.5)
+                {
+                    x += sx; // ++x
+                    e -= 1;
+                }
+            }
+        }
+    }
+}
+
+// floating-point: e > 1
+// ========================================================================
+function drawLineFloatErrorOne( x0, y0, x1, y1, color )
+{
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e = 0, // Error
+        m;
+
+    if (dx === 0) // Handle trivial case of vertical line to avoid divide by zero
+    {
+        for( y = 0; y <= ay; ++y )
+            zoompixel( x0, y0 + y*sy, putpixel, color );
+    }
+    else
+    {
+        if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
+        {
+            m  = 2 * ay / ax;
+            for( x = 0; x <= ax; ++x )
+            {
+                zoompixel( x0 + x*sx, y, putpixel, color );
+
+                e += m;
+                if (e > 1)
+                {
+                    y += sy;
+                    e -= 2;
+                }
+            }
+        }
+        else // >= 45 degrees, Octants 1, 2, 5, 6
+        {
+            m = 2 * ax / ay;
+            for( y = 0; y <= ay; ++y )
+            {
+                zoompixel( x, y0 + y*sy, putpixel, color );
+
+                e += m;
+                if (e > 1)
+                {
+                    x += sx;
+                    e -= 2;
+                }
+            }
         }
     }
 }
 
 // floating-point: m=2dy, e > dx
 // ========================================================================
-function line5( x0, y0, x1, y1, color )
+function drawLineFloatErrroDX( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e = 0, // Error
+        m;
 
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = 2*dy;
-    var e  = 0;
-
-    for( x = x0; x <= x1; ++x )
+    if (dx === 0) // Handle trivial case of vertical line to avoid divide by zero
     {
-        zoompixel( x, y, putpixel, color );
-
-        e += m;
-        if (e > dx)
+        for( y = 0; y <= ay; ++y )
+            zoompixel( x0, y0 + y*sy, putpixel, color );
+    }
+    else
+    {
+        if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
         {
-            y++;
-            e -= 2*dx;
+            m = 2*ay;
+            for( x = 0; x <= ax; ++x )
+            {
+                zoompixel( x0 + x*sx, y, putpixel, color );
+
+                e += m;
+                if (e > ax)
+                {
+                    y += sy;
+                    e -= 2*ax;
+                }
+            }
+        }
+        else // >= 45 degrees, Octants 1, 2, 5, 6
+        {
+            m = 2*ax;
+            for( y = 0; y <= ay; ++y )
+            {
+                zoompixel( x, y0 + y*sy, putpixel, color );
+
+                e += m;
+                if (e > ay)
+                {
+                    x += sx;
+                    e -= 2*ay;
+                }
+            }
         }
     }
 }
 
-// floating-point: negdx
+// floating-point: e > 0
 // ========================================================================
-function line6( x0, y0, x1, y1, color )
+function drawLineErrorZero( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    //            Delta             Sign                     Absolute Delta
+    var x = x0|0, dx = (x1 - x0)|0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = (y1 - y0)|0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e = undefined, // Error
+        m = undefined;
 
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = 2*dy;
-    var e  = -dx;
-
-    for( x = x0; x <= x1; ++x )
+    if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
     {
-        zoompixel( x, y, putpixel, color );
-
-        e += m;
-        if (e > 0)
+        e = -ax;
+        m = 2*ay;
+        for( x = 0; x <= ax; ++x )
         {
-            y++;
-            e -= 2*dx;
+            zoompixel( x0 + x*sx, y, putpixel, color );
+
+            e += m;
+            if (e > 0)
+            {
+                y += sy;
+                e -= 2*ax;
+            }
+        }
+    }
+    else // >= 45 degrees, Octants 1, 2, 5, 6
+    {
+        e = -ay;
+        m = 2*ax;
+        for( y = 0; y <= ay; ++y )
+        {
+            zoompixel( x, y0 + y*sy, putpixel, color );
+
+            e += m;
+            if (e > 0)
+            {
+                x += sx;
+                e -= 2*ay;
+            }
         }
     }
 }
@@ -600,21 +744,38 @@ function line6( x0, y0, x1, y1, color )
 // ========================================================================
 function linei( x0, y0, x1, y1, color )
 {
-    var x, y = y0;
+    //            Delta         Sign                     Absolute Delta
+    var x = x0|0, dx = x1 - x0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = y1 - y0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e;     // Error
 
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var s  = -dx;
-
-    for( x = x0; x <= x1; ++x )
+    if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
     {
-        zoompixel( x, y, addpixel, color );
-
-        s += 2*dy;
-        if (s > 0)
+        e = -ax;           // -dx
+        for( x = 0; x <= ax; ++x )
         {
-            s -= 2*dx;
-            y++;
+            zoompixel( x0 + x*sx, y, addpixel, color );
+
+            e += 2*ay;     // dy
+            if (e > 0)
+            {
+                e -= 2*ax; // dx
+                y += sy;   // y++;
+            }
+        }
+    }
+    else // >= 45 degrees, Octants 1, 2, 5, 6
+    {
+        e = -ay; // -dy
+        for( y = 0; y <= ay; ++y )
+        {
+            zoompixel( x, y0 + y*sy, addpixel, color );
+            e += 2*ax;
+            if (e > 0)
+            {
+                e -= 2*ay;
+                x += sx; // x++
+            }
         }
     }
 }
@@ -623,31 +784,12 @@ function linei( x0, y0, x1, y1, color )
 // ========================================================================
 function linej( x0, y0, x1, y1, color )
 {
-    var x = x0|0, y = y0|0;
+    //            Delta         Sign                     Absolute Delta
+    var x = x0|0, dx = x1 - x0, sx = (dx < 0) ? -1 : +1, ax = Math.abs(dx),
+        y = y0|0, dy = y1 - y0, sy = (dy < 0) ? -1 : +1, ay = Math.abs(dy),
+        e;     // Error
 
-    var dx = x1 - x0;            // Delta
-    var dy = y1 - y0;
-    var e                      ; // Error
-    var sx = (dx < 0) ? -1 : +1; // Sign
-    var sy = (dy < 0) ? -1 : +1;
-    var ax = Math.abs(dx);
-    var ay = Math.abs(dy);
-
-    if (ay >= ax) // >= 45 degrees, Octant II
-    {
-        e = -ay; // -dy
-        for( y = 0; y <= ay; ++y )
-        {
-            zoompixel( x, y0 + y*sy, addpixel, color );
-            e += 2*ax;
-            if (e >= 0)
-            {
-                e -= 2*ay;
-                x += sx; // x++
-            }
-        }
-    }
-    else // < 45 degrees, Octant I, III, V, VI
+    if (ay < ax) // < 45 degrees, Octants 0, 3, 4, 7
     {
         e = -ax;           // -dx
         for( x = 0; x <= ax; ++x )
@@ -659,6 +801,20 @@ function linej( x0, y0, x1, y1, color )
             {
                 e -= 2*ax; // dx
                 y += sy;   // y++;
+            }
+        }
+    }
+    else // >= 45 degrees, Octants 1, 2, 5, 6
+    {
+        e = -ay; // -dy
+        for( y = 0; y <= ay; ++y )
+        {
+            zoompixel( x, y0 + y*sy, addpixel, color );
+            e += 2*ax;
+            if (e >= 0)
+            {
+                e -= 2*ay;
+                x += sx; // x++
             }
         }
     }
@@ -701,6 +857,11 @@ function onDragStart( evt )
 
     if( giSelected )
         gbIsDragging = true;
+
+    // Switch to custom line
+    var max = Examples.length / 4,
+        which = 7;
+    uiUpdateButtonStates( which, max, 'buttonEx' );
 }
 
 function onDragStop( evt )
@@ -718,10 +879,13 @@ function onExample( which )
     if (which <   0) which = 0;
     if (which > max) which = max-1;
 
-    x0 = Examples[ which*4 + 0];
-    y0 = Examples[ which*4 + 1];
-    x1 = Examples[ which*4 + 2];
-    y1 = Examples[ which*4 + 3];
+    if (which != 7) // Custom uses existing coordinates
+    {
+        x0 = Examples[ which*4 + 0];
+        y0 = Examples[ which*4 + 1];
+        x1 = Examples[ which*4 + 2];
+        y1 = Examples[ which*4 + 3];
+    }
 
     x0 = gridClampX( x0 );
     x1 = gridClampX( x1 );
@@ -733,25 +897,7 @@ function onExample( which )
     uiUpdateButtonStates( which, max, 'buttonEx' );
 }
 
-function onLine1()
-{
-    update( LINE_FLOAT_ROUND );
-
-    var text = "" +
-"    var dx = x1 - x0;\n"+
-"    var dy = y1 - y0;\n"+
-"    var m  = dy / dx;\n"+
-"\n"+
-"    for( x = x0; x <= x1; ++x )\n"+
-"    {\n"+
-"        pixel( x, Math.round(y) );\n"+
-"\n"+
-"        y += m;\n"+
-"    }\n";
-    output( text );
-}
-
-function onLine2()
+function onAlgorithm1()
 {
     update( LINE_FLOAT_TRUNC );
 
@@ -770,9 +916,27 @@ function onLine2()
     output( text );
 }
 
-function onLine3()
+function onAlgorithm2()
 {
-    update( LINE_FLOAT_HALFE );
+    update( LINE_FLOAT_ROUND );
+
+    var text = "" +
+"    var dx = x1 - x0;\n"+
+"    var dy = y1 - y0;\n"+
+"    var m  = dy / dx;\n"+
+"\n"+
+"    for( x = x0; x <= x1; ++x )\n"+
+"    {\n"+
+"        pixel( x, Math.round(y) );\n"+
+"\n"+
+"        y += m;\n"+
+"    }\n";
+    output( text );
+}
+
+function onAlgorithm3()
+{
+    update( LINE_FLOAT_E_HALF );
 
     var text = "" +
 "    var dx = x1 - x0;\n"+
@@ -794,9 +958,9 @@ function onLine3()
     output( text );
 }
 
-function onLine4()
+function onAlgorithm4()
 {
-    update( LINE_FLOAT_ONE_E );
+    update( LINE_FLOAT_E_ONE );
 
     var text = "" +
 "    var dx = x1 - x0;\n"+
@@ -818,9 +982,9 @@ function onLine4()
     output( text );
 }
 
-function onLine5()
+function onAlgorithm5()
 {
-    update( LINE_FLOAT_M_2DY );
+    update( LINE_FLOAT_E_DX );
 
     var text = "" +
 "    var dx = x1 - x0;\n"+
@@ -842,9 +1006,9 @@ function onLine5()
     output( text );
 }
 
-function onLine6()
+function onAlgorithm6()
 {
-    update( LINE_FLOAT_E_G_0 );
+    update( LINE_FLOAT_E_ZERO );
 
     var text = "" +
 "    var dx = x1 - x0;\n"+
@@ -867,7 +1031,7 @@ function onLine6()
     output( text );
 }
 
-function onLineI()
+function onAlgorithmI()
 {
     update( LINE_INT_G0 );
 
@@ -891,7 +1055,7 @@ function onLineI()
     output( text );
 }
 
-function onLineJ()
+function onAlgorithmJ()
 {
     update( LINE_INT_GE );
 
@@ -920,7 +1084,7 @@ function onLoad()
 {
     init();
     onExample(5);
-    onLineJ();
+    onAlgorithmJ();
 
     // Add callbacks to move end points
     // Install callbacks
@@ -964,7 +1128,7 @@ function update( type )
 {
     line = type;
 
-    uiUpdateButtonStates( type, LINE_INT_GE+1, 'buttonLine' );
+    uiUpdateButtonStates( type, LINE_NUM_TYPES, 'buttonAlgorithm' );
 
     var colorSkyBlue= [128,128,255,255];
     var colorGray50 = [128,128,128,255];
@@ -1007,29 +1171,20 @@ function update( type )
         ax = Math.abs( dx ),
         ay = Math.abs( dy );
 
-    // Handle Trivial Cases
-    if (dx == 0) // Vertical Line
-        for( y = 0; y <= ay; ++y )
-            zoompoint( x0, y0 + y*sy, addpixel, actualLineColor, gZoomX - 2, gZoomY - 2 );
-    else
-    if (dy == 0) // Horizontal Line
-        for( x = 0; x <= ax; ++x )
-            zoompoint( x0 + x*sx, y0, addpixel, actualLineColor, gZoomX - 2, gZoomY - 2 );
-    else // Diagonal Cases
     {
-        if (type == LINE_FLOAT_TRUNC) line1( x0, y0, x1, y1, actualLineColor ); // float: truncate
-        if (type == LINE_FLOAT_ROUND) line2( x0, y0, x1, y1, actualLineColor ); // float: round
-        if (type == LINE_FLOAT_HALFE) line3( x0, y0, x1, y1, actualLineColor ); // float: e > 0.5
-        if (type == LINE_FLOAT_ONE_E) line4( x0, y0, x1, y1, actualLineColor ); // float: e > 1
-        if (type == LINE_FLOAT_M_2DY) line5( x0, y0, x1, y1, actualLineColor ); // float: e > dx
-        if (type == LINE_FLOAT_E_G_0) line6( x0, y0, x1, y1, actualLineColor ); // float: e > 0
-        if (type == LINE_INT_G0     ) linei( x0, y0, x1, y1, actualLineColor ); // int: >  0
-        if (type == LINE_INT_GE     ) linej( x0, y0, x1, y1, actualLineColor ); // int: >= 0
+        if (type == LINE_FLOAT_TRUNC ) drawLineFloatTrunc    ( x0, y0, x1, y1, actualLineColor ); // float: truncate
+        if (type == LINE_FLOAT_ROUND ) drawLineFloatRound    ( x0, y0, x1, y1, actualLineColor ); // float: round
+        if (type == LINE_FLOAT_E_HALF) drawLineFloatErrorHalf( x0, y0, x1, y1, actualLineColor ); // float: e > 0.5
+        if (type == LINE_FLOAT_E_ONE ) drawLineFloatErrorOne ( x0, y0, x1, y1, actualLineColor ); // float: e > 1
+        if (type == LINE_FLOAT_E_DX  ) drawLineFloatErrroDX  ( x0, y0, x1, y1, actualLineColor ); // float: e > dx
+        if (type == LINE_FLOAT_E_ZERO) drawLineErrorZero     ( x0, y0, x1, y1, actualLineColor ); // float: e > 0
+        if (type == LINE_INT_G0      ) linei( x0, y0, x1, y1, actualLineColor ); // int: >  0
+        if (type == LINE_INT_GE      ) linej( x0, y0, x1, y1, actualLineColor ); // int: >= 0
     }
 
     // Draw colorized small dot at vertices to help visually tell which are left & right ends
-    zoompoint( x0, y0, putpixel, colorVertexL, 3, 3 );
-    zoompoint( x1, y1, putpixel, colorVertexR, 3, 3 );
+    zoompoint( x0, y0, putpixel, colorVertexL, 5, 5 );
+    zoompoint( x1, y1, putpixel, colorVertexR, 5, 5 );
     draw();
 
     var coords = document.getElementById( 'coords' );
@@ -1060,21 +1215,25 @@ function update( type )
     </table>
     <table>
         <tr><td>
-<button id="buttonLine0" onclick="onLine1()">Float Round        </button>
-<button id="buttonLine1" onclick="onLine2()">Float Trunc        </button>
-<button id="buttonLine2" onclick="onLine3()">Float e &gt; &half;</button>
-<button id="buttonLine3" onclick="onLine4()">Float e &gt; 1     </button>
-<button id="buttonLine4" onclick="onLine5()">Float e &gt; dx    </button>
-<button id="buttonLine5" onclick="onLine6()">Float e &gt; 0     </button>
-<button id="buttonLine6" onclick="onLineI()">Int &gt; 0         </button>
-<button id="buttonLine7" onclick="onLineJ()">Int &gt;= 0        </button>
+Algorithm:&nbsp;
+<button id="buttonAlgorithm0" onclick="onAlgorithm1()">Trunc        </button>
+<button id="buttonAlgorithm1" onclick="onAlgorithm2()">Round        </button>
+<button id="buttonAlgorithm2" onclick="onAlgorithm3()">e &gt; &half;</button>
+<button id="buttonAlgorithm3" onclick="onAlgorithm4()">e &gt; 1     </button>
+<button id="buttonAlgorithm4" onclick="onAlgorithm5()">e &gt; dx    </button>
+<button id="buttonAlgorithm5" onclick="onAlgorithm6()">e &gt; 0     </button>
+<button id="buttonAlgorithm6" onclick="onAlgorithmI()">Int &gt; 0         </button>
+<button id="buttonAlgorithm7" onclick="onAlgorithmJ()">Int &gt;= 0        </button>
         </td></tr><tr><td>
+Line:&nbsp;
 <button id='buttonEx0' onclick='onExample(0)'>Line 0</button>
 <button id='buttonEx1' onclick='onExample(1)'>Line 1</button>
 <button id='buttonEx2' onclick='onExample(2)'>Line 2</button>
 <button id='buttonEx3' onclick='onExample(3)'>Line 3</button>
 <button id='buttonEx4' onclick='onExample(4)'>Line 4</button>
 <button id='buttonEx5' onclick='onExample(5)'>Line 5</button>
+<button id='buttonEx6' onclick='onExample(6)'>Line Vertical</button>
+<button id='buttonEx7' onclick='onExample(7)'>Custom</button>
         </td></tr>
     </table>
 <h2>Proof of Bresenham / Mid-Point formula</h1>
