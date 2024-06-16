@@ -447,11 +447,11 @@ function line0( x0, y0, x1, y1, color )
 // ========================================================================
 function line1( x0, y0, x1, y1, color )
 {
-    var x, y = y0|0;
-
-    var dx = x1 - x0;
-    var dy = y1 - y0;
-    var m  = dy / dx;
+    var x = x0|0,
+        y = y0|0,
+        dx = x1 - x0,
+        dy = y1 - y0,
+        m  = dy / dx;
 
     for( x = x0; x <= x1; ++x )
     {
