@@ -942,7 +942,10 @@ function uiUpdateButtonStates( selected, total, baseName )
     for( var button = 0; button < total; button++ )
     {
         var elem = document.getElementById( baseName + button );
-        var css = elem.getAttribute( 'class' );
+        if (elem === null || elem === undefined)
+            console.error( "Missing <button id=%o>", baseName + button );
+
+        var css = elem.getAttribute( 'class' ); // NOTE: null = first update
 
         if (button == selected)
         {
